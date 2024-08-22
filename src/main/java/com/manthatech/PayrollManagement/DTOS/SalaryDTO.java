@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class SalaryDTO {
+public abstract class SalaryDTO {
     private Long id;
     private Long employeeId;
     private LocalDate paymentDate;

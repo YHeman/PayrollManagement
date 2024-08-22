@@ -1,10 +1,8 @@
 package com.manthatech.PayrollManagement.controller;
 
-import com.manthatech.PayrollManagement.DTOS.*;
-import com.manthatech.PayrollManagement.model.FullTimeSalary;
+import com.manthatech.PayrollManagement.DTOS.SalaryDTO;
 import com.manthatech.PayrollManagement.model.Salary;
-import com.manthatech.PayrollManagement.service.BaseSalaryService;
-import com.manthatech.PayrollManagement.service.FullTimeSalaryService;
+import com.manthatech.PayrollManagement.service.SalaryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -20,60 +19,79 @@ import java.util.stream.Collectors;
 public class SalaryController {
 
     @Autowired
-    private FullTimeSalaryService fullTimeSalaryService;
+    private Map<String, SalaryService<? extends Salary, ? extends SalaryDTO>> salaryServices;
 
-    @PostMapping("/fulltime")
-    public ResponseEntity<SalaryDTO> createFullTimeSalary(@RequestBody FullTimeSalaryDTO salaryDTO) {
-        FullTimeSalary createdSalary = fullTimeSalaryService.createSalary(salaryDTO);
-        return ResponseEntity.ok(fullTimeSalaryService.convertToDTO(createdSalary));
+    private SalaryService<? extends Salary, ? extends SalaryDTO> getSalaryService(String type) {
+        SalaryService<? extends Salary, ? extends SalaryDTO> service = salaryServices.get(type.toLowerCase() + "SalaryService");
+        if (service == null) {
+            throw new IllegalArgumentException("Unsupported salary type: " + type);
+        }
+        return service;
     }
 
-    @PutMapping("/fulltime/{id}")
-    public ResponseEntity<SalaryDTO> updateFullTimeSalary(@PathVariable Long id, @RequestBody FullTimeSalaryDTO salaryDTO) {
-        FullTimeSalary updatedSalary = fullTimeSalaryService.updateSalary(id, salaryDTO);
-        return ResponseEntity.ok(fullTimeSalaryService.convertToDTO(updatedSalary));
+    @SuppressWarnings("unchecked")
+    private <D extends SalaryDTO> SalaryService<? extends Salary, D> getTypedSalaryService(String type) {
+        return (SalaryService<? extends Salary, D>) getSalaryService(type);
     }
 
-    // Common endpoints for all salary types
-    @GetMapping("/{id}")
-    public ResponseEntity<SalaryDTO> getSalaryById(@PathVariable Long id) {
-        // You might need to determine which service to use based on the salary type
-        // For simplicity, let's use FullTimeSalaryService as an example
-        return fullTimeSalaryService.getSalaryById(id)
-                .map(salary -> ResponseEntity.ok(fullTimeSalaryService.convertToDTO(salary)))
+
+    @PostMapping("/{type}")
+    public <D extends SalaryDTO> ResponseEntity<D> createSalary(@PathVariable String type, @RequestBody D salaryDTO) {
+        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
+        D createdSalary = service.createSalary(salaryDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdSalary);
+    }
+
+    @PutMapping("/{type}/{id}")
+    public <D extends SalaryDTO> ResponseEntity<D> updateSalary(@PathVariable String type, @PathVariable Long id, @RequestBody D salaryDTO) {
+        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
+        D updatedSalary = service.updateSalary(id, salaryDTO);
+        return ResponseEntity.ok(updatedSalary);
+    }
+
+    @GetMapping("/{type}/{id}")
+    public <D extends SalaryDTO> ResponseEntity<D> getSalaryById(@PathVariable String type, @PathVariable Long id) {
+        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
+        return service.getSalaryById(id)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteSalary(@PathVariable Long id) {
-        // Similar to getSalaryById, you might need to determine which service to use
-        fullTimeSalaryService.deleteSalary(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/employee/{employeeId}")
-    public ResponseEntity<List<SalaryDTO>> getSalariesByEmployeeId(@PathVariable Long employeeId) {
-        // You might need to aggregate results from all salary types
-        List<FullTimeSalary> salaries = fullTimeSalaryService.getSalariesByEmployeeId(employeeId);
-        List<SalaryDTO> salaryDTOs = salaries.stream()
-                .map(fullTimeSalaryService::convertToDTO)
-                .collect(Collectors.toList());
+    @GetMapping("/{type}")
+    public <D extends SalaryDTO> ResponseEntity<List<D>> getAllSalaries(@PathVariable String type) {
+        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
+        List<D> salaryDTOs = service.getAllSalaries();
         return ResponseEntity.ok(salaryDTOs);
     }
 
-    @GetMapping("/{id}/gross")
-    public ResponseEntity<BigDecimal> calculateGrossSalary(@PathVariable Long id) {
-        // You might need to determine which service to use based on the salary type
-        BigDecimal grossSalary = fullTimeSalaryService.calculateGrossSalary(id);
+    @GetMapping("/{type}/employee/{employeeId}")
+    public <D extends SalaryDTO> ResponseEntity<List<D>> getSalariesByEmployeeId(@PathVariable String type, @PathVariable Long employeeId) {
+        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
+        List<D> salaryDTOs = service.getSalariesByEmployeeId(employeeId);
+        return ResponseEntity.ok(salaryDTOs);
+    }
+
+
+    @DeleteMapping("/{type}/{id}")
+    public ResponseEntity<Void> deleteSalary(@PathVariable String type, @PathVariable Long id) {
+        SalaryService<? extends Salary, ? extends SalaryDTO> service = getSalaryService(type);
+        service.deleteSalary(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+
+    @GetMapping("/{type}/{id}/gross")
+    public ResponseEntity<BigDecimal> calculateGrossSalary(@PathVariable String type, @PathVariable Long id) {
+        SalaryService<? extends Salary, ? extends SalaryDTO> service = getSalaryService(type);
+        BigDecimal grossSalary = service.calculateGrossSalary(id);
         return ResponseEntity.ok(grossSalary);
     }
 
-    @GetMapping("/{id}/net")
-    public ResponseEntity<BigDecimal> calculateNetSalary(@PathVariable Long id) {
-        // You might need to determine which service to use based on the salary type
-        BigDecimal netSalary = fullTimeSalaryService.calculateNetSalary(id);
+    @GetMapping("/{type}/{id}/net")
+    public ResponseEntity<BigDecimal> calculateNetSalary(@PathVariable String type, @PathVariable Long id) {
+        SalaryService<? extends Salary, ? extends SalaryDTO> service = getSalaryService(type);
+        BigDecimal netSalary = service.calculateNetSalary(id);
         return ResponseEntity.ok(netSalary);
     }
-
-
 }

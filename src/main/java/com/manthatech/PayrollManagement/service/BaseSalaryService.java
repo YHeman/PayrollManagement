@@ -11,9 +11,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
-public abstract class BaseSalaryService<T extends Salary, D extends SalaryDTO> {
+public abstract class BaseSalaryService<T extends Salary, D extends SalaryDTO> implements SalaryService<T, D>{
 
     @Autowired
     protected SalaryRepository<T> salaryRepository;
@@ -24,14 +25,23 @@ public abstract class BaseSalaryService<T extends Salary, D extends SalaryDTO> {
     @Autowired
     protected SalaryCalculationService salaryCalculationService;
 
-    @Transactional(readOnly = true)
-    public Optional<T> getSalaryById(Long id) {
-        return salaryRepository.findById(id);
+    @Override
+    public Optional<D> getSalaryById(Long id) {
+        return salaryRepository.findById(id).map(this::convertToDTO);
     }
 
-    @Transactional(readOnly = true)
-    public List<T> getAllSalaries() {
-        return salaryRepository.findAll();
+    @Override
+    public List<D> getAllSalaries() {
+        return salaryRepository.findAll().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<D> getSalariesByEmployeeId(Long employeeId) {
+        return salaryRepository.findByEmployeeEmployeeId(employeeId).stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional
@@ -39,21 +49,17 @@ public abstract class BaseSalaryService<T extends Salary, D extends SalaryDTO> {
         salaryRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
-    public List<T> getSalariesByEmployeeId(Long employeeId) {
-        return salaryRepository.findByEmployeeEmployeeId(employeeId);
-    }
 
     @Transactional(readOnly = true)
     public BigDecimal calculateGrossSalary(Long salaryId) {
-        T salary = getSalaryById(salaryId)
+        T salary = salaryRepository.findById(salaryId)
                 .orElseThrow(() -> new EntityNotFoundException("Salary not found with id: " + salaryId));
         return salaryCalculationService.calculateGrossSalary(salary);
     }
 
     @Transactional
     public BigDecimal calculateNetSalary(Long salaryId) {
-        T salary = getSalaryById(salaryId)
+        T salary = salaryRepository.findById(salaryId)
                 .orElseThrow(() -> new EntityNotFoundException("Salary not found with id: " + salaryId));
         return salaryCalculationService.calculateNetSalary(salary);
     }
@@ -66,12 +72,7 @@ public abstract class BaseSalaryService<T extends Salary, D extends SalaryDTO> {
     }
 
     // Abstract methods to be implemented by subclasses
-    protected abstract T convertToEntity(D salaryDTO);
     protected abstract D convertToDTO(T salary);
+    protected abstract T convertToEntity(D salaryDTO);
 
-    @Transactional
-    public abstract T createSalary(D salaryDTO);
-
-    @Transactional
-    public abstract T updateSalary(Long id, D salaryDTO);
 }

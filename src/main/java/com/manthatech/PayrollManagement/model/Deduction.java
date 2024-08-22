@@ -27,7 +27,7 @@ public class Deduction {
     private boolean isStatutory;
     private boolean isMandatory;
 
-    @OneToMany(mappedBy = "allowance")
+    @OneToMany(mappedBy = "deduction")
     @JsonIgnore
     private Set<StructureDeduction> structureDeductions = new HashSet<>();
 

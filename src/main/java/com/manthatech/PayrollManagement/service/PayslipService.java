@@ -30,7 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.format.DateTimeFormatter;
-
+/*
 @Service
 public class PayslipService {
 
@@ -259,3 +259,4 @@ public class PayslipService {
         }
     }
 }
+*/

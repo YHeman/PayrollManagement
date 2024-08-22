@@ -33,7 +33,7 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
 
     @Override
     @Transactional
-    public FullTimeSalary createSalary(FullTimeSalaryDTO salaryDTO) {
+    public FullTimeSalaryDTO createSalary(FullTimeSalaryDTO salaryDTO) {
         FullTimeSalary salary = convertToEntity(salaryDTO);
 
         Employee employee = employeeRepository.findById(salaryDTO.getEmployeeId())
@@ -49,12 +49,12 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
 
         validateSalaryType(employee, salary);
 
-        return fullTimeSalaryRepository.save(salary);
+        return convertToDTO(fullTimeSalaryRepository.save(salary));
     }
 
     @Override
     @Transactional
-    public FullTimeSalary updateSalary(Long id, FullTimeSalaryDTO salaryDTO) {
+    public FullTimeSalaryDTO updateSalary(Long id, FullTimeSalaryDTO salaryDTO) {
         FullTimeSalary salary = fullTimeSalaryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Salary not found"));
 
@@ -75,7 +75,7 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
 
         validateSalaryType(salary.getEmployee(), salary);
 
-        return fullTimeSalaryRepository.save(salary);
+        return convertToDTO(fullTimeSalaryRepository.save(salary));
     }
 
     private void setCustomAllowances(FullTimeSalary salary, Set<EmployeeAllowanceDTO> allowanceDTOs) {
@@ -101,7 +101,7 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
     }
 
     @Override
-    protected FullTimeSalary convertToEntity(FullTimeSalaryDTO salaryDTO) {
+    public FullTimeSalary convertToEntity(FullTimeSalaryDTO salaryDTO) {
         FullTimeSalary salary = new FullTimeSalary();
         salary.setCustomBaseSalary(salaryDTO.getCustomBaseSalary());
         salary.setBaseMultiplier(salaryDTO.getBaseMultiplier());
@@ -111,7 +111,7 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
     }
 
     @Override
-    protected FullTimeSalaryDTO convertToDTO(FullTimeSalary salary) {
+    public FullTimeSalaryDTO convertToDTO(FullTimeSalary salary) {
         FullTimeSalaryDTO dto = new FullTimeSalaryDTO();
         dto.setId(salary.getId());
         dto.setEmployeeId(salary.getEmployee().getEmployeeId());

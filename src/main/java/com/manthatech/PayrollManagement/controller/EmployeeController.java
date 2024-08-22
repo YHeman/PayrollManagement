@@ -57,10 +57,10 @@ public class EmployeeController {
         return ResponseEntity.ok(updatedInfo);
     }
 
-    @GetMapping("/{employeeId}/salary-history")
-    public ResponseEntity<List<FullTimeSalaryDTO>> getEmployeeSalaryHistory(@PathVariable Long employeeId) {
-        List<FullTimeSalaryDTO> salaryHistory = employeeService.getEmployeeSalaryHistory(employeeId);
-        return ResponseEntity.ok(salaryHistory);
-    }
+//    @GetMapping("/{employeeId}/salary-history")
+//    public ResponseEntity<List<FullTimeSalaryDTO>> getEmployeeSalaryHistory(@PathVariable Long employeeId) {
+//        List<FullTimeSalaryDTO> salaryHistory = employeeService.getEmployeeSalaryHistory(employeeId);
+//        return ResponseEntity.ok(salaryHistory);
+//    }
 }
 
