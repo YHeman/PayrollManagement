@@ -29,4 +29,8 @@ public class SalaryStructure {
     @OneToMany(mappedBy = "salaryStructure", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<StructureDeduction> structureDeductions = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(name = "country_id")
+    private Country country;
+
 }

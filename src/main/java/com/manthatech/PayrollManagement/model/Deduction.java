@@ -35,4 +35,8 @@ public class Deduction {
     @JsonIgnore
     private Set<EmployeeDeduction> employeeDeductions = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(name = "country_id")
+    private Country country;
+
 }

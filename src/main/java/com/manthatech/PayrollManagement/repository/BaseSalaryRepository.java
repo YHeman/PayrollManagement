@@ -7,7 +7,7 @@ import java.util.List;
 
 
 @Repository
-public interface SalaryRepository<T extends Salary> extends JpaRepository<T, Long> {
+public interface BaseSalaryRepository<T extends Salary> extends JpaRepository<T, Long> {
     List<T> findByEmployeeEmployeeId(Long employeeId);
 
 }

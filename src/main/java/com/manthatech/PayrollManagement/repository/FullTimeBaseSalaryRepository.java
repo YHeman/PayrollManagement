@@ -1,9 +1,8 @@
 package com.manthatech.PayrollManagement.repository;
 
 import com.manthatech.PayrollManagement.model.FullTimeSalary;
-import org.springframework.stereotype.Repository;
 
 
-public interface FullTimeSalaryRepository extends SalaryRepository<FullTimeSalary> {
+public interface FullTimeBaseSalaryRepository extends BaseSalaryRepository<FullTimeSalary> {
     // Add any FullTimeSalary specific methods here
 }

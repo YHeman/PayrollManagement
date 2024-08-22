@@ -6,7 +6,7 @@ import com.manthatech.PayrollManagement.model.*;
 import com.manthatech.PayrollManagement.DTOS.FullTimeSalaryDTO;
 import com.manthatech.PayrollManagement.repository.AllowanceRepository;
 import com.manthatech.PayrollManagement.repository.DeductionRepository;
-import com.manthatech.PayrollManagement.repository.FullTimeSalaryRepository;
+import com.manthatech.PayrollManagement.repository.FullTimeBaseSalaryRepository;
 import com.manthatech.PayrollManagement.repository.SalaryStructureRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Service
+@Service("fullTImeSalaryService")
 public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, FullTimeSalaryDTO> {
 
     @Autowired
@@ -29,7 +29,7 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
     private DeductionRepository deductionRepository;
 
     @Autowired
-    private FullTimeSalaryRepository fullTimeSalaryRepository;
+    private FullTimeBaseSalaryRepository fullTimeSalaryRepository;
 
     @Override
     @Transactional

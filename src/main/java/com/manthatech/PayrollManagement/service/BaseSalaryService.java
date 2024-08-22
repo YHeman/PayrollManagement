@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 public abstract class BaseSalaryService<T extends Salary, D extends SalaryDTO> implements SalaryService<T, D>{
 
     @Autowired
-    protected SalaryRepository<T> salaryRepository;
+    protected BaseSalaryRepository<T> baseSalaryRepository;
 
     @Autowired
     protected EmployeeRepository employeeRepository;
@@ -27,39 +27,39 @@ public abstract class BaseSalaryService<T extends Salary, D extends SalaryDTO> i
 
     @Override
     public Optional<D> getSalaryById(Long id) {
-        return salaryRepository.findById(id).map(this::convertToDTO);
+        return baseSalaryRepository.findById(id).map(this::convertToDTO);
     }
 
     @Override
     public List<D> getAllSalaries() {
-        return salaryRepository.findAll().stream()
+        return baseSalaryRepository.findAll().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<D> getSalariesByEmployeeId(Long employeeId) {
-        return salaryRepository.findByEmployeeEmployeeId(employeeId).stream()
+        return baseSalaryRepository.findByEmployeeEmployeeId(employeeId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
     @Transactional
     public void deleteSalary(Long id) {
-        salaryRepository.deleteById(id);
+        baseSalaryRepository.deleteById(id);
     }
 
 
     @Transactional(readOnly = true)
     public BigDecimal calculateGrossSalary(Long salaryId) {
-        T salary = salaryRepository.findById(salaryId)
+        T salary = baseSalaryRepository.findById(salaryId)
                 .orElseThrow(() -> new EntityNotFoundException("Salary not found with id: " + salaryId));
         return salaryCalculationService.calculateGrossSalary(salary);
     }
 
     @Transactional
     public BigDecimal calculateNetSalary(Long salaryId) {
-        T salary = salaryRepository.findById(salaryId)
+        T salary = baseSalaryRepository.findById(salaryId)
                 .orElseThrow(() -> new EntityNotFoundException("Salary not found with id: " + salaryId));
         return salaryCalculationService.calculateNetSalary(salary);
     }

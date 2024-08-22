@@ -3,6 +3,8 @@ package com.manthatech.PayrollManagement.controller;
 import com.manthatech.PayrollManagement.DTOS.SalaryDTO;
 import com.manthatech.PayrollManagement.model.Salary;
 import com.manthatech.PayrollManagement.service.SalaryService;
+import com.manthatech.PayrollManagement.service.SalaryServiceAggregator;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/api/salaries")
@@ -20,6 +21,11 @@ public class SalaryController {
 
     @Autowired
     private Map<String, SalaryService<? extends Salary, ? extends SalaryDTO>> salaryServices;
+
+    @Autowired
+    private SalaryServiceAggregator salaryServiceAggregator;
+
+
 
     private SalaryService<? extends Salary, ? extends SalaryDTO> getSalaryService(String type) {
         SalaryService<? extends Salary, ? extends SalaryDTO> service = salaryServices.get(type.toLowerCase() + "SalaryService");
@@ -49,13 +55,21 @@ public class SalaryController {
         return ResponseEntity.ok(updatedSalary);
     }
 
-    @GetMapping("/{type}/{id}")
-    public <D extends SalaryDTO> ResponseEntity<D> getSalaryById(@PathVariable String type, @PathVariable Long id) {
-        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getSalaryById(@PathVariable Long id) {
+        SalaryService<? extends Salary, ? extends SalaryDTO> service = salaryServiceAggregator.getSalaryServiceById(id);
         return service.getSalaryById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+//    @GetMapping("/{type}/{id}")
+//    public <D extends SalaryDTO> ResponseEntity<D> getSalaryById(@PathVariable String type, @PathVariable Long id) {
+//        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
+//        return service.getSalaryById(id)
+//                .map(ResponseEntity::ok)
+//                .orElse(ResponseEntity.notFound().build());
+//    }
 
     @GetMapping("/{type}")
     public <D extends SalaryDTO> ResponseEntity<List<D>> getAllSalaries(@PathVariable String type) {
@@ -93,5 +107,10 @@ public class SalaryController {
         SalaryService<? extends Salary, ? extends SalaryDTO> service = getSalaryService(type);
         BigDecimal netSalary = service.calculateNetSalary(id);
         return ResponseEntity.ok(netSalary);
+    }
+
+    @PostConstruct
+    public void init() {
+        System.out.println("Autowired SalaryServices: " + salaryServices.keySet());
     }
 }

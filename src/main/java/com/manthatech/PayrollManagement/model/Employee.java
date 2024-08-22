@@ -40,6 +40,9 @@ public class Employee {
     @Column(name = "employee_type")
     private EmployeeType employeeType;
 
+    @ManyToOne
+    @JoinColumn(name = "country_id")
+    private Country country;
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -57,7 +60,7 @@ public class Employee {
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 
-    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "manager", cascade = CascadeType.ALL)
     private EmployeeSensitiveInfo sensitiveInfo;
 
     private LocalDateTime createdAt = LocalDateTime.now();

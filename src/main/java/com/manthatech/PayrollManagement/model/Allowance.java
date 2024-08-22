@@ -34,4 +34,8 @@ public class Allowance {
     @JsonIgnore
     private Set<EmployeeAllowance> employeeAllowances = new HashSet<>();
 
+    @ManyToOne
+    @JoinColumn(name = "country_id")
+    private Country country;
+
 }
