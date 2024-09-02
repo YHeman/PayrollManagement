@@ -15,6 +15,6 @@ public class SalaryStructureDTO {
     private BigDecimal baseSalary;
     private Set<StructureAllowanceDTO> structureAllowances;
     private Set<StructureDeductionDTO> structureDeductions;
-
+    private Long countryId;
 }
 

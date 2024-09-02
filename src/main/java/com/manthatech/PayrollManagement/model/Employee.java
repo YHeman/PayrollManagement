@@ -60,7 +60,7 @@ public class Employee {
     @JoinColumn(name = "department_id", nullable = false)
     private Department department;
 
-    @OneToOne(mappedBy = "manager", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "employee", cascade = CascadeType.ALL)
     private EmployeeSensitiveInfo sensitiveInfo;
 
     private LocalDateTime createdAt = LocalDateTime.now();

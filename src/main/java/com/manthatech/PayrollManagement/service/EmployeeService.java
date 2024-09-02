@@ -3,14 +3,8 @@ package com.manthatech.PayrollManagement.service;
 import com.manthatech.PayrollManagement.DTOS.EmployeeDTO;
 import com.manthatech.PayrollManagement.DTOS.EmployeeSensitiveInfoDTO;
 import com.manthatech.PayrollManagement.DTOS.FullTimeSalaryDTO;
-import com.manthatech.PayrollManagement.model.Department;
-import com.manthatech.PayrollManagement.model.Employee;
-import com.manthatech.PayrollManagement.model.EmployeeSensitiveInfo;
-import com.manthatech.PayrollManagement.model.Job;
-import com.manthatech.PayrollManagement.repository.DepartmentRepository;
-import com.manthatech.PayrollManagement.repository.EmployeeRepository;
-import com.manthatech.PayrollManagement.repository.EmployeeSensitiveInfoRepository;
-import com.manthatech.PayrollManagement.repository.JobRepository;
+import com.manthatech.PayrollManagement.model.*;
+import com.manthatech.PayrollManagement.repository.*;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -35,7 +29,8 @@ public class EmployeeService {
     private EmployeeSensitiveInfoRepository sensitiveInfoRepository;
 
     @Autowired
-    private BaseSalaryService baseSalaryService;
+    private CountryRepository countryRepository;
+
 
     public Employee createEmployee(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
@@ -104,6 +99,12 @@ public class EmployeeService {
         if (employeeDTO.getHireDate() != null) employee.setHireDate(employeeDTO.getHireDate());
         if (employeeDTO.getStatus() != null) employee.setStatus(employeeDTO.getStatus());
 
+        if (employeeDTO.getCountryId() != null) {
+            Country country = countryRepository.findById(employeeDTO.getCountryId())
+                    .orElseThrow(() -> new EntityNotFoundException("Country Not Found"));
+            employee.setCountry(country);
+        }
+
         if (employeeDTO.getJobId() != null) {
             Job job = jobRepository.findById(employeeDTO.getJobId())
                     .orElseThrow(() -> new EntityNotFoundException("Job not found"));
@@ -128,6 +129,7 @@ public class EmployeeService {
         employeeDTO.setStatus(employee.getStatus());
         employeeDTO.setJobId(employee.getJob().getJobId());
         employeeDTO.setDepartmentId(employee.getDepartment().getDepartmentId());
+        employeeDTO.setCountryId(employee.getCountry().getId());
         return employeeDTO;
     }
 

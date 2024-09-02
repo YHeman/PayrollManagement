@@ -4,7 +4,6 @@ import com.manthatech.PayrollManagement.DTOS.SalaryDTO;
 import com.manthatech.PayrollManagement.model.Salary;
 import com.manthatech.PayrollManagement.service.SalaryService;
 import com.manthatech.PayrollManagement.service.SalaryServiceAggregator;
-import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 
 
 @RestController
@@ -20,97 +18,55 @@ import java.util.Map;
 public class SalaryController {
 
     @Autowired
-    private Map<String, SalaryService<? extends Salary, ? extends SalaryDTO>> salaryServices;
-
-    @Autowired
     private SalaryServiceAggregator salaryServiceAggregator;
-
-
-
-    private SalaryService<? extends Salary, ? extends SalaryDTO> getSalaryService(String type) {
-        SalaryService<? extends Salary, ? extends SalaryDTO> service = salaryServices.get(type.toLowerCase() + "SalaryService");
-        if (service == null) {
-            throw new IllegalArgumentException("Unsupported salary type: " + type);
-        }
-        return service;
-    }
-
-    @SuppressWarnings("unchecked")
-    private <D extends SalaryDTO> SalaryService<? extends Salary, D> getTypedSalaryService(String type) {
-        return (SalaryService<? extends Salary, D>) getSalaryService(type);
-    }
-
-
-    @PostMapping("/{type}")
-    public <D extends SalaryDTO> ResponseEntity<D> createSalary(@PathVariable String type, @RequestBody D salaryDTO) {
-        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
-        D createdSalary = service.createSalary(salaryDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdSalary);
-    }
-
-    @PutMapping("/{type}/{id}")
-    public <D extends SalaryDTO> ResponseEntity<D> updateSalary(@PathVariable String type, @PathVariable Long id, @RequestBody D salaryDTO) {
-        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
-        D updatedSalary = service.updateSalary(id, salaryDTO);
-        return ResponseEntity.ok(updatedSalary);
-    }
-
     @GetMapping("/{id}")
-    public ResponseEntity<?> getSalaryById(@PathVariable Long id) {
-        SalaryService<? extends Salary, ? extends SalaryDTO> service = salaryServiceAggregator.getSalaryServiceById(id);
+    public ResponseEntity<? extends SalaryDTO> getSalaryById(@PathVariable Long id) {
+        SalaryService<?, ? extends SalaryDTO> service = salaryServiceAggregator.getSalaryServiceById(id);
         return service.getSalaryById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-//    @GetMapping("/{type}/{id}")
-//    public <D extends SalaryDTO> ResponseEntity<D> getSalaryById(@PathVariable String type, @PathVariable Long id) {
-//        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
-//        return service.getSalaryById(id)
-//                .map(ResponseEntity::ok)
-//                .orElse(ResponseEntity.notFound().build());
-//    }
-
-    @GetMapping("/{type}")
-    public <D extends SalaryDTO> ResponseEntity<List<D>> getAllSalaries(@PathVariable String type) {
-        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
-        List<D> salaryDTOs = service.getAllSalaries();
-        return ResponseEntity.ok(salaryDTOs);
+    @PostMapping
+    public ResponseEntity<SalaryDTO> createSalary(@RequestBody SalaryDTO salaryDTO) {
+        SalaryService<?, SalaryDTO> service = salaryServiceAggregator.getSalaryServiceByDTO(salaryDTO);
+        SalaryDTO createdSalary = service.createSalary(salaryDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdSalary);
     }
 
-    @GetMapping("/{type}/employee/{employeeId}")
-    public <D extends SalaryDTO> ResponseEntity<List<D>> getSalariesByEmployeeId(@PathVariable String type, @PathVariable Long employeeId) {
-        SalaryService<? extends Salary, D> service = getTypedSalaryService(type);
-        List<D> salaryDTOs = service.getSalariesByEmployeeId(employeeId);
-        return ResponseEntity.ok(salaryDTOs);
+    @PutMapping("/{id}")
+    public ResponseEntity<SalaryDTO> updateSalary(@PathVariable Long id, @RequestBody SalaryDTO salaryDTO) {
+        SalaryService<?, SalaryDTO> service = salaryServiceAggregator.getSalaryServiceByDTO(salaryDTO);
+        SalaryDTO updatedSalary = service.updateSalary(id, salaryDTO);
+        return ResponseEntity.ok(updatedSalary);
     }
 
-
-    @DeleteMapping("/{type}/{id}")
-    public ResponseEntity<Void> deleteSalary(@PathVariable String type, @PathVariable Long id) {
-        SalaryService<? extends Salary, ? extends SalaryDTO> service = getSalaryService(type);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteSalary(@PathVariable Long id) {
+        SalaryService<?, ?> service = salaryServiceAggregator.getSalaryServiceById(id);
         service.deleteSalary(id);
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/employee/{employeeId}")
+    public ResponseEntity<List<SalaryDTO>> getSalariesByEmployeeId(@PathVariable Long employeeId) {
+        // Assuming all salary types are handled the same way for this endpoint
+        SalaryService<?, ? extends SalaryDTO> service = salaryServiceAggregator.getDefaultSalaryService();
+        List<? extends SalaryDTO> salaries = service.getSalariesByEmployeeId(employeeId);
+        return ResponseEntity.ok((List<SalaryDTO>) salaries);
+    }
 
-
-    @GetMapping("/{type}/{id}/gross")
-    public ResponseEntity<BigDecimal> calculateGrossSalary(@PathVariable String type, @PathVariable Long id) {
-        SalaryService<? extends Salary, ? extends SalaryDTO> service = getSalaryService(type);
+    @GetMapping("/{id}/gross")
+    public ResponseEntity<BigDecimal> calculateGrossSalary(@PathVariable Long id) {
+        SalaryService<?, ?> service = salaryServiceAggregator.getSalaryServiceById(id);
         BigDecimal grossSalary = service.calculateGrossSalary(id);
         return ResponseEntity.ok(grossSalary);
     }
 
-    @GetMapping("/{type}/{id}/net")
-    public ResponseEntity<BigDecimal> calculateNetSalary(@PathVariable String type, @PathVariable Long id) {
-        SalaryService<? extends Salary, ? extends SalaryDTO> service = getSalaryService(type);
+    @GetMapping("/{id}/net")
+    public ResponseEntity<BigDecimal> calculateNetSalary(@PathVariable Long id) {
+        SalaryService<?, ?> service = salaryServiceAggregator.getSalaryServiceById(id);
         BigDecimal netSalary = service.calculateNetSalary(id);
         return ResponseEntity.ok(netSalary);
-    }
-
-    @PostConstruct
-    public void init() {
-        System.out.println("Autowired SalaryServices: " + salaryServices.keySet());
     }
 }

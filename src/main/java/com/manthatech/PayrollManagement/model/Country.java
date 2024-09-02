@@ -1,10 +1,16 @@
 package com.manthatech.PayrollManagement.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -21,15 +27,19 @@ public class Country {
     private String country;
 
     @OneToMany(mappedBy = "country")
-    private Allowance allowance;
+    @JsonBackReference
+    private Set<Allowance> countryAllowances = new HashSet<>();
 
     @OneToMany(mappedBy = "country")
-    private Employee employee;
+    @JsonBackReference
+    private Set<Deduction> countryDeductions = new HashSet<>();
 
     @OneToMany(mappedBy = "country")
-    private Deduction deduction;
+    @JsonBackReference
+    private Set<Employee> countryEmployees = new HashSet<>();
 
     @OneToMany(mappedBy = "country")
-    private SalaryStructure salaryStructure;
+    @JsonBackReference
+    private List<SalaryStructure> countrySalaryStructures = new ArrayList<>();
 
 }

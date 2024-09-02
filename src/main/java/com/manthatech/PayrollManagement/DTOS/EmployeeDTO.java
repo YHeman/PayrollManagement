@@ -17,4 +17,5 @@ public class EmployeeDTO {
     private String status;
     private Long jobId;
     private Long departmentId;
+    private Long countryId;
 }

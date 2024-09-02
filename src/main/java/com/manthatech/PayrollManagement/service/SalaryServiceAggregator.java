@@ -1,5 +1,6 @@
 package com.manthatech.PayrollManagement.service;
 
+import com.manthatech.PayrollManagement.DTOS.FullTimeSalaryDTO;
 import com.manthatech.PayrollManagement.DTOS.SalaryDTO;
 import com.manthatech.PayrollManagement.model.FullTimeSalary;
 import com.manthatech.PayrollManagement.model.Salary;
@@ -19,21 +20,34 @@ public class SalaryServiceAggregator {
     @Autowired
     private Map<String, SalaryService<? extends Salary, ? extends SalaryDTO>> salaryServices;
 
-    public SalaryService<? extends Salary, ? extends SalaryDTO> getSalaryServiceById(Long id) {
+    public SalaryService<?, ? extends SalaryDTO> getSalaryServiceById(Long id) {
         Salary salary = salaryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Salary not found with id: " + id));
 
+        return getSalaryServiceByType(salary);
+    }
+
+    public SalaryService<?, SalaryDTO> getSalaryServiceByDTO(SalaryDTO salaryDTO) {
+        if (salaryDTO instanceof FullTimeSalaryDTO) {
+            return (SalaryService<?, SalaryDTO>) salaryServices.get("fullTimeSalaryService");
+        }
+        // more types
+
+        throw new IllegalArgumentException("Unsupported salary DTO type: " + salaryDTO.getClass().getSimpleName());
+    }
+
+    private SalaryService<?, ? extends SalaryDTO> getSalaryServiceByType(Salary salary) {
         if (salary instanceof FullTimeSalary) {
             return salaryServices.get("fullTimeSalaryService");
         }
-       /* else if (salary instanceof PartTimeSalary) {
-            return salaryServices.get("partTimeSalaryService");
-        } else if (salary instanceof FreelanceSalary) {
-            return salaryServices.get("freelanceSalaryService");
-        }
-       */
+        // more services
 
         throw new IllegalArgumentException("Unsupported salary type: " + salary.getClass().getSimpleName());
+    }
+
+    public SalaryService<?, ? extends SalaryDTO> getDefaultSalaryService() {
+        // Return a default service, e.g., the FullTimeSalaryService
+        return salaryServices.get("fullTimeSalaryService");
     }
 }
 
