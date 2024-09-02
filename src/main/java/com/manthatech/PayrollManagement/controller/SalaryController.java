@@ -1,7 +1,6 @@
 package com.manthatech.PayrollManagement.controller;
 
 import com.manthatech.PayrollManagement.DTOS.SalaryDTO;
-import com.manthatech.PayrollManagement.model.Salary;
 import com.manthatech.PayrollManagement.service.SalaryService;
 import com.manthatech.PayrollManagement.service.SalaryServiceAggregator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +49,7 @@ public class SalaryController {
 
     @GetMapping("/employee/{employeeId}")
     public ResponseEntity<List<SalaryDTO>> getSalariesByEmployeeId(@PathVariable Long employeeId) {
-        // Assuming all salary types are handled the same way for this endpoint
+        // Assuming all salary types are handled the same way, default set to fullTimeSalary
         SalaryService<?, ? extends SalaryDTO> service = salaryServiceAggregator.getDefaultSalaryService();
         List<? extends SalaryDTO> salaries = service.getSalariesByEmployeeId(employeeId);
         return ResponseEntity.ok((List<SalaryDTO>) salaries);
