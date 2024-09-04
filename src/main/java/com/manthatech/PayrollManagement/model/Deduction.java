@@ -26,6 +26,7 @@ public class Deduction {
     private String description;
     private boolean isStatutory;
     private boolean isMandatory;
+    private boolean isPercentageBased;
 
     @OneToMany(mappedBy = "deduction")
     @JsonIgnore

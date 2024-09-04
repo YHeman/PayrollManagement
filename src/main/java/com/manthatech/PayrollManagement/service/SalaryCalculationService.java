@@ -1,114 +1,128 @@
 package com.manthatech.PayrollManagement.service;
 
+import com.manthatech.PayrollManagement.DTOS.SalaryCalculationResult;
 import com.manthatech.PayrollManagement.model.*;
+import com.manthatech.PayrollManagement.utils.SalaryConfiguration;
+import com.manthatech.PayrollManagement.utils.WorkingDaysCalculator;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
 public class SalaryCalculationService {
 
-    public BigDecimal calculateGrossSalary(Salary salary) {
+    private final WorkingDaysCalculator workingDaysCalculator;
+    private final SalaryConfiguration salaryConfiguration;
+    private final HolidayService holidayService;
+
+    public SalaryCalculationService(WorkingDaysCalculator workingDaysCalculator,
+                                    SalaryConfiguration salaryConfiguration,
+                                    HolidayService holidayService) {
+        this.workingDaysCalculator = workingDaysCalculator;
+        this.salaryConfiguration = salaryConfiguration;
+        this.holidayService = holidayService;
+    }
+
+    @Cacheable("workingDaysCache")
+    public int getWorkingDays(LocalDate paymentDate) {
+        List<LocalDate> holidays = holidayService.getHolidaysForMonth(paymentDate.getYear(), paymentDate.getMonth());
+        return workingDaysCalculator.getWorkingDaysInMonth(paymentDate.getYear(), paymentDate.getMonth(), holidays);
+    }
+
+    public SalaryCalculationResult calculateSalary(Salary salary) {
         if (salary instanceof FullTimeSalary) {
-            return calculateFullTimeGrossSalary((FullTimeSalary) salary);
-        } else if (salary instanceof PartTimeSalary) {
-            return calculatePartTimeGrossSalary((PartTimeSalary) salary);
-        } else if (salary instanceof FreelanceSalary) {
-            return calculateFreelanceGrossSalary((FreelanceSalary) salary);
+            return calculateFullTimeSalary((FullTimeSalary) salary);
         } else {
             throw new IllegalArgumentException("Unsupported salary type: " + salary.getClass().getSimpleName());
         }
     }
 
-    public BigDecimal calculateNetSalary(Salary salary) {
-        if (salary instanceof FullTimeSalary) {
-            return calculateFullTimeNetSalary((FullTimeSalary) salary);
-        } else if (salary instanceof PartTimeSalary) {
-            return calculatePartTimeNetSalary((PartTimeSalary) salary);
-        } else if (salary instanceof FreelanceSalary) {
-            return calculateFreelanceNetSalary((FreelanceSalary) salary);
-        } else {
-            throw new IllegalArgumentException("Unsupported salary type: " + salary.getClass().getSimpleName());
-        }
-    }
-
-    private BigDecimal calculateFullTimeGrossSalary(FullTimeSalary salary) {
-        BigDecimal baseSalary = salary.getCustomBaseSalary() != null ?
-                salary.getCustomBaseSalary() :
-                salary.getSalaryStructure().getBaseSalary().multiply(salary.getBaseMultiplier());
-
+    private SalaryCalculationResult calculateFullTimeSalary(FullTimeSalary salary) {
+        BigDecimal baseSalary = calculateBaseSalary(salary);
         BigDecimal allowances = calculateAllowances(salary);
         BigDecimal benefits = calculateBenefits(salary);
 
-        return baseSalary.add(allowances).add(benefits);
+        BigDecimal grossEarnings = baseSalary.add(allowances).add(benefits);
+        BigDecimal lossOfPay = calculateLossOfPay(salary, grossEarnings);
+
+        BigDecimal adjustedGrossSalary = grossEarnings.subtract(lossOfPay);
+        BigDecimal deductions = calculateDeductions(salary, adjustedGrossSalary);
+        BigDecimal netSalary = adjustedGrossSalary.subtract(deductions);
+
+        return new SalaryCalculationResult(baseSalary, allowances, benefits, lossOfPay, deductions, adjustedGrossSalary, netSalary);
     }
 
-    private BigDecimal calculateFullTimeNetSalary(FullTimeSalary salary) {
-        BigDecimal grossSalary = calculateFullTimeGrossSalary(salary);
-        BigDecimal totalDeductions = calculateTotalDeductions(salary);
-
-        return grossSalary.subtract(totalDeductions);
+    private BigDecimal calculateBaseSalary(FullTimeSalary salary) {
+        return salary.getCustomBaseSalary() != null ?
+                salary.getCustomBaseSalary() :
+                salary.getSalaryStructure().getBaseSalary().multiply(salary.getBaseMultiplier());
     }
 
-    private BigDecimal calculatePartTimeGrossSalary(PartTimeSalary salary) {
-        //part-time salary calculation logic
-        return null;  // Placeholder
+    private BigDecimal calculateLossOfPay(FullTimeSalary salary, BigDecimal grossEarnings) {
+        int daysInMonth = getDaysForLOPCalculation(salary.getPaymentDate());
+        BigDecimal dailySalary = grossEarnings.divide(BigDecimal.valueOf(daysInMonth), RoundingMode.HALF_UP);
+
+        int lopDays = salary.getLopDays();
+        return dailySalary.multiply(BigDecimal.valueOf(lopDays));
     }
 
-    private BigDecimal calculatePartTimeNetSalary(PartTimeSalary salary) {
-        // part-time net salary calculation logic
-        return null;  // Placeholder
-    }
-
-    private BigDecimal calculateFreelanceGrossSalary(FreelanceSalary salary) {
-        // freelance salary calculation logic
-        return null;  // Placeholder
-    }
-
-    private BigDecimal calculateFreelanceNetSalary(FreelanceSalary salary) {
-        // freelance net salary calculation logic
-        return null;  // Placeholder
+    private int getDaysForLOPCalculation(LocalDate paymentDate) {
+        if (salaryConfiguration.isUseFixedDaysForLOP()) {
+            return salaryConfiguration.getFixedDaysPerMonth();
+        } else {
+            return getWorkingDays(paymentDate);
+        }
     }
 
     private BigDecimal calculateAllowances(FullTimeSalary salary) {
-        Map<Allowance, BigDecimal> effectiveAllowances = new HashMap<>();
+        Map<Allowance, BigDecimal> effectiveAllowances = new HashMap<>(
+                salary.getSalaryStructure().getStructureAllowances().stream()
+                        .collect(Collectors.toMap(StructureAllowance::getAllowance, StructureAllowance::getAmount))
+        );
 
-        for (StructureAllowance sa : salary.getSalaryStructure().getStructureAllowances()) {
-            effectiveAllowances.put(sa.getAllowance(), sa.getAmount());
-        }
-
-        for (EmployeeAllowance ca : salary.getCustomAllowances()) {
-            effectiveAllowances.put(ca.getAllowance(), ca.getAmount());
-        }
+        salary.getCustomAllowances().forEach(ca ->
+                effectiveAllowances.put(ca.getAllowance(), ca.getAmount())
+        );
 
         return effectiveAllowances.values().stream()
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private BigDecimal calculateBenefits(FullTimeSalary salary) {
-        // benefits calculation logic
+        // Implement benefits calculation logic
         return BigDecimal.ZERO;  // Placeholder
     }
 
-    private BigDecimal calculateTotalDeductions(FullTimeSalary salary) {
-        Map<Deduction, BigDecimal> effectiveDeductions = new HashMap<>();
+    private BigDecimal calculateDeductions(FullTimeSalary salary, BigDecimal adjustedGrossSalary) {
+        Map<Deduction, BigDecimal> effectiveDeductions = new HashMap<>(
+                salary.getSalaryStructure().getStructureDeductions().stream()
+                        .collect(Collectors.toMap(StructureDeduction::getDeduction, StructureDeduction::getAmount))
+        );
 
-        // First, add all structure deductions
-        for (StructureDeduction sd : salary.getSalaryStructure().getStructureDeductions()) {
-            effectiveDeductions.put(sd.getDeduction(), sd.getAmount());
-        }
+        salary.getCustomDeductions().forEach(cd ->
+                effectiveDeductions.put(cd.getDeduction(), cd.getAmount())
+        );
 
-        // Then, override with custom deductions or add new ones
-        for (EmployeeDeduction cd : salary.getCustomDeductions()) {
-            effectiveDeductions.put(cd.getDeduction(), cd.getAmount());
-        }
+        // Calculate percentage-based deductions on adjusted gross salary
+        effectiveDeductions.replaceAll((deduction, amount) ->
+                deduction.isPercentageBased() ?
+                        adjustedGrossSalary.multiply(amount.divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP)) :
+                        amount
+        );
 
-        // Sum up all effective deductions
         return effectiveDeductions.values().stream()
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
+
+
+
 

@@ -27,4 +27,6 @@ public class FullTimeSalary extends Salary {
     @OneToMany(mappedBy = "salary", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<EmployeeDeduction> customDeductions = new HashSet<>();
+
+    private int lopDays;
 }
