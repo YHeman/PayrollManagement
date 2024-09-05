@@ -1,11 +1,13 @@
 package com.manthatech.PayrollManagement.utils;
 
+import org.springframework.stereotype.Component;
+
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.List;
 
-
+@Component
 public class WorkingDaysCalculator {
 
     public int getWorkingDaysInMonth(int year, Month month, List<LocalDate> holidays) {

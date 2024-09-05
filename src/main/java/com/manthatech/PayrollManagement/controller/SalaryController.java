@@ -1,5 +1,6 @@
 package com.manthatech.PayrollManagement.controller;
 
+import com.manthatech.PayrollManagement.DTOS.SalaryCalculationResult;
 import com.manthatech.PayrollManagement.DTOS.SalaryDTO;
 import com.manthatech.PayrollManagement.service.SalaryService;
 import com.manthatech.PayrollManagement.service.SalaryServiceAggregator;
@@ -55,17 +56,23 @@ public class SalaryController {
         return ResponseEntity.ok((List<SalaryDTO>) salaries);
     }
 
-    @GetMapping("/{id}/gross")
-    public ResponseEntity<BigDecimal> calculateGrossSalary(@PathVariable Long id) {
+    public ResponseEntity<SalaryCalculationResult> calculateSalary(@PathVariable Long id) {
         SalaryService<?, ?> service = salaryServiceAggregator.getSalaryServiceById(id);
-        BigDecimal grossSalary = service.calculateGrossSalary(id);
-        return ResponseEntity.ok(grossSalary);
+        SalaryCalculationResult salary = service.calculateSalary(id);
+        return ResponseEntity.ok(salary);
     }
 
-    @GetMapping("/{id}/net")
-    public ResponseEntity<BigDecimal> calculateNetSalary(@PathVariable Long id) {
-        SalaryService<?, ?> service = salaryServiceAggregator.getSalaryServiceById(id);
-        BigDecimal netSalary = service.calculateNetSalary(id);
-        return ResponseEntity.ok(netSalary);
-    }
+//    @GetMapping("/{id}/gross")
+//    public ResponseEntity<BigDecimal> calculateGrossSalary(@PathVariable Long id) {
+//        SalaryService<?, ?> service = salaryServiceAggregator.getSalaryServiceById(id);
+//        BigDecimal grossSalary = service.calculateGrossSalary(id);
+//        return ResponseEntity.ok(grossSalary);
+//    }
+//
+//    @GetMapping("/{id}/net")
+//    public ResponseEntity<BigDecimal> calculateNetSalary(@PathVariable Long id) {
+//        SalaryService<?, ?> service = salaryServiceAggregator.getSalaryServiceById(id);
+//        BigDecimal netSalary = service.calculateNetSalary(id);
+//        return ResponseEntity.ok(netSalary);
+//    }
 }

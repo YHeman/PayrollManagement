@@ -1,6 +1,7 @@
 package com.manthatech.PayrollManagement.service;
 
 
+import com.manthatech.PayrollManagement.DTOS.SalaryCalculationResult;
 import org.springframework.transaction.annotation.Transactional;
 import com.manthatech.PayrollManagement.DTOS.SalaryDTO;
 import com.manthatech.PayrollManagement.model.*;
@@ -49,20 +50,26 @@ public abstract class BaseSalaryService<T extends Salary, D extends SalaryDTO> i
         baseSalaryRepository.deleteById(id);
     }
 
-
-    @Transactional(readOnly = true)
-    public BigDecimal calculateGrossSalary(Long salaryId) {
+    public SalaryCalculationResult calculateSalary(Long salaryId) {
         T salary = baseSalaryRepository.findById(salaryId)
                 .orElseThrow(() -> new EntityNotFoundException("Salary not found with id: " + salaryId));
-        return salaryCalculationService.calculateGrossSalary(salary);
+        return salaryCalculationService.calculateSalary(salary);
     }
 
-    @Transactional
-    public BigDecimal calculateNetSalary(Long salaryId) {
-        T salary = baseSalaryRepository.findById(salaryId)
-                .orElseThrow(() -> new EntityNotFoundException("Salary not found with id: " + salaryId));
-        return salaryCalculationService.calculateNetSalary(salary);
-    }
+
+//    @Transactional(readOnly = true)
+//    public BigDecimal calculateGrossSalary(Long salaryId) {
+//        T salary = baseSalaryRepository.findById(salaryId)
+//                .orElseThrow(() -> new EntityNotFoundException("Salary not found with id: " + salaryId));
+//        return salaryCalculationService.calculateGrossSalary(salary);
+//    }
+//
+//    @Transactional
+//    public BigDecimal calculateNetSalary(Long salaryId) {
+//        T salary = baseSalaryRepository.findById(salaryId)
+//                .orElseThrow(() -> new EntityNotFoundException("Salary not found with id: " + salaryId));
+//        return salaryCalculationService.calculateNetSalary(salary);
+//    }
 
     protected void validateSalaryType(Employee employee, T salary) {
         EmployeeType expectedType = EmployeeType.fromSalaryClass(salary.getClass());

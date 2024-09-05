@@ -19,5 +19,16 @@ public class SalaryCalculationResult {
     private final BigDecimal grossSalary;
     private final BigDecimal netSalary;
 
-    //  add toString method
+    @Override
+    public String toString() {
+        return "SalaryCalculationResult{" +
+                "baseSalary=" + baseSalary +
+                ", allowances=" + allowances +
+                ", benefits=" + benefits +
+                ", lossOfPay=" + lossOfPay +
+                ", deductions=" + deductions +
+                ", grossSalary=" + grossSalary +
+                ", netSalary=" + netSalary +
+                '}';
+    }
 }

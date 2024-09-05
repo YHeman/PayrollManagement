@@ -1,5 +1,6 @@
 package com.manthatech.PayrollManagement.service;
 
+import com.manthatech.PayrollManagement.DTOS.SalaryCalculationResult;
 import com.manthatech.PayrollManagement.DTOS.SalaryDTO;
 import com.manthatech.PayrollManagement.model.Salary;
 
@@ -14,6 +15,7 @@ public interface SalaryService<T extends Salary, D extends SalaryDTO> {
     D updateSalary(Long id, D salaryDTO);
     void deleteSalary(Long id);
     List<D> getSalariesByEmployeeId(Long employeeId);
-    BigDecimal calculateGrossSalary(Long id);
-    BigDecimal calculateNetSalary(Long id);
+    SalaryCalculationResult calculateSalary(Long id);
+//    BigDecimal calculateGrossSalary(Long id);
+//    BigDecimal calculateNetSalary(Long id);
 }
