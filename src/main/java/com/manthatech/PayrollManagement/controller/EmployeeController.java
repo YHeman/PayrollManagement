@@ -57,6 +57,10 @@ public class EmployeeController {
         return ResponseEntity.ok(updatedInfo);
     }
 
+    public ResponseEntity<EmployeeSensitiveInfoDTO> getEmployeeSensitiveInfo(@PathVariable Long employeeId) {
+        return new ResponseEntity<>(employeeService.getEmployeeSensitiveInfo(employeeId), HttpStatus.OK);
+    }
+
 //    @GetMapping("/{employeeId}/salary-history")
 //    public ResponseEntity<List<FullTimeSalaryDTO>> getEmployeeSalaryHistory(@PathVariable Long employeeId) {
 //        List<FullTimeSalaryDTO> salaryHistory = employeeService.getEmployeeSalaryHistory(employeeId);

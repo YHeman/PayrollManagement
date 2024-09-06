@@ -82,6 +82,13 @@ public class EmployeeService {
         sensitiveInfo.setUpdatedAt(LocalDateTime.now());
         return sensitiveInfoRepository.save(sensitiveInfo);
     }
+    public EmployeeSensitiveInfoDTO getEmployeeSensitiveInfo(Long employeeId) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+        EmployeeSensitiveInfo employeeSensitiveInfo = employee.getSensitiveInfo();
+        return mapEntityToSensitiveInfoDTO(employeeSensitiveInfo);
+    }
+
 
 //    public List<FullTimeSalaryDTO> getEmployeeSalaryHistory(Long employeeId) {
 //        Employee employee = employeeRepository.findById(employeeId)
@@ -140,5 +147,16 @@ public class EmployeeService {
         sensitiveInfo.setIfscCode(sensitiveInfoDTO.getIfscCode());
         sensitiveInfo.setAadhaarNumber(sensitiveInfoDTO.getAadhaarNumber());
     }
+
+    private EmployeeSensitiveInfoDTO mapEntityToSensitiveInfoDTO(EmployeeSensitiveInfo employeeSensitiveInfo) {
+        EmployeeSensitiveInfoDTO employeeSensitiveInfoDTO = new EmployeeSensitiveInfoDTO();
+        employeeSensitiveInfoDTO.setPan(employeeSensitiveInfo.getPan());
+        employeeSensitiveInfoDTO.setAadhaarNumber(employeeSensitiveInfo.getAadhaarNumber());
+        employeeSensitiveInfoDTO.setBankName(employeeSensitiveInfo.getBankName());
+        employeeSensitiveInfoDTO.setBankAccountNumber(employeeSensitiveInfo.getBankAccountNumber());
+        employeeSensitiveInfoDTO.setIfscCode(employeeSensitiveInfo.getIfscCode());
+        return employeeSensitiveInfoDTO;
+    }
+
 }
 
