@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/salary-structures")
 public class SalaryStructureController {
@@ -18,6 +20,11 @@ public class SalaryStructureController {
     public ResponseEntity<SalaryStructureDTO> createSalaryStructure(@RequestBody SalaryStructureDTO salaryStructureDTO) {
         SalaryStructureDTO createdStructure = salaryStructureService.createSalaryStructure(salaryStructureDTO);
         return new ResponseEntity<>(createdStructure, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<SalaryStructureDTO>> getAllStructures() {
+        return new ResponseEntity<>(salaryStructureService.getAllStructures(), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")
@@ -34,6 +41,7 @@ public class SalaryStructureController {
         SalaryStructureDTO salaryStructureDTO = salaryStructureService.getSalaryStructure(id);
         return new ResponseEntity<>(salaryStructureDTO, HttpStatus.OK);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteSalaryStructure(@PathVariable Long id) {

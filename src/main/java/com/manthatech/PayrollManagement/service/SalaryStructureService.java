@@ -11,6 +11,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -101,6 +102,11 @@ public class SalaryStructureService {
         SalaryStructure updatedSalaryStructure = salaryStructureRepository.save(salaryStructure);
 
         return convertToDTO(updatedSalaryStructure);
+    }
+
+    public List<SalaryStructureDTO> getAllStructures() {
+        return salaryStructureRepository.findAll().stream().map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
 
