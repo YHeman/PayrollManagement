@@ -6,13 +6,14 @@ import com.manthatech.PayrollManagement.model.*;
 import com.manthatech.PayrollManagement.DTOS.FullTimeSalaryDTO;
 import com.manthatech.PayrollManagement.repository.AllowanceRepository;
 import com.manthatech.PayrollManagement.repository.DeductionRepository;
-import com.manthatech.PayrollManagement.repository.FullTimeBaseSalaryRepository;
+import com.manthatech.PayrollManagement.repository.FullTimeSalaryRepository;
 import com.manthatech.PayrollManagement.repository.SalaryStructureRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -29,7 +30,7 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
     private DeductionRepository deductionRepository;
 
     @Autowired
-    private FullTimeBaseSalaryRepository fullTimeSalaryRepository;
+    private FullTimeSalaryRepository fullTimeSalaryRepository;
 
     @Override
     @Transactional
@@ -44,10 +45,10 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
                 .orElseThrow(() -> new EntityNotFoundException("Salary structure not found"));
         salary.setSalaryStructure(salaryStructure);
 
-        setCustomAllowances(salary, salaryDTO.getCustomAllowances());
-        setCustomDeductions(salary, salaryDTO.getCustomDeductions());
+        if(salaryDTO.getCustomAllowances() != null)  setCustomAllowances(salary, salaryDTO.getCustomAllowances());
+        if(salaryDTO.getCustomDeductions() != null) setCustomDeductions(salary, salaryDTO.getCustomDeductions());
 
-        validateSalaryType(employee, salary);
+//        validateSalaryType(employee, salary);
 
         return convertToDTO(fullTimeSalaryRepository.save(salary));
     }
@@ -58,22 +59,26 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
         FullTimeSalary salary = fullTimeSalaryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Salary not found"));
 
-        salary.setCustomBaseSalary(salaryDTO.getCustomBaseSalary());
-        salary.setBaseMultiplier(salaryDTO.getBaseMultiplier());
-        salary.setPaymentDate(salaryDTO.getPaymentDate());
-        salary.setPaymentPeriod(salaryDTO.getPaymentPeriod());
+        if (salaryDTO.getCustomBaseSalary() != null) salary.setCustomBaseSalary(salaryDTO.getCustomBaseSalary());
+        if (salaryDTO.getBaseMultiplier() != null) salary.setBaseMultiplier(salaryDTO.getBaseMultiplier());
+        if (salaryDTO.getPaymentDate() != null) salary.setPaymentDate(salaryDTO.getPaymentDate());
+        if (salaryDTO.getPaymentPeriod() != null) salary.setPaymentPeriod(salaryDTO.getPaymentPeriod());
+        if (salaryDTO.getSalaryStructureId() != null) {
+            SalaryStructure salaryStructure = salaryStructureRepository.findById(salaryDTO.getSalaryStructureId())
+                    .orElseThrow(() -> new EntityNotFoundException("Salary structure not found"));
+            salary.setSalaryStructure(salaryStructure);
+        }
 
-        SalaryStructure salaryStructure = salaryStructureRepository.findById(salaryDTO.getSalaryStructureId())
-                .orElseThrow(() -> new EntityNotFoundException("Salary structure not found"));
-        salary.setSalaryStructure(salaryStructure);
+        if(salaryDTO.getCustomAllowances() != null) {
+            salary.getCustomAllowances().clear();
+            setCustomAllowances(salary, salaryDTO.getCustomAllowances());
+        }
+        if(salaryDTO.getCustomDeductions() != null) {
+            salary.getCustomDeductions().clear();
+            setCustomDeductions(salary, salaryDTO.getCustomDeductions());
+        }
 
-        salary.getCustomAllowances().clear();
-        setCustomAllowances(salary, salaryDTO.getCustomAllowances());
-
-        salary.getCustomDeductions().clear();
-        setCustomDeductions(salary, salaryDTO.getCustomDeductions());
-
-        validateSalaryType(salary.getEmployee(), salary);
+//        validateSalaryType(salary.getEmployee(), salary);
 
         return convertToDTO(fullTimeSalaryRepository.save(salary));
     }
@@ -103,8 +108,10 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
     @Override
     public FullTimeSalary convertToEntity(FullTimeSalaryDTO salaryDTO) {
         FullTimeSalary salary = new FullTimeSalary();
-        salary.setCustomBaseSalary(salaryDTO.getCustomBaseSalary());
-        salary.setBaseMultiplier(salaryDTO.getBaseMultiplier());
+        if(salaryDTO.getCustomBaseSalary() != null) salary.setCustomBaseSalary(salaryDTO.getCustomBaseSalary());
+        if(salaryDTO.getBaseMultiplier() != null) salary.setBaseMultiplier(salaryDTO.getBaseMultiplier());
+        else salary.setBaseMultiplier(BigDecimal.ONE);
+        if (salaryDTO.getLopDays() != null) salary.setLopDays(salaryDTO.getLopDays());
         salary.setPaymentDate(salaryDTO.getPaymentDate());
         salary.setPaymentPeriod(salaryDTO.getPaymentPeriod());
         return salary;
@@ -126,6 +133,7 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
         dto.setCustomDeductions(salary.getCustomDeductions().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toSet()));
+        dto.setLopDays(salary.getLopDays());
 
         return dto;
     }

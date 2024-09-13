@@ -2,7 +2,6 @@ package com.manthatech.PayrollManagement.service;
 
 import com.manthatech.PayrollManagement.DTOS.EmployeeDTO;
 import com.manthatech.PayrollManagement.DTOS.EmployeeSensitiveInfoDTO;
-import com.manthatech.PayrollManagement.DTOS.FullTimeSalaryDTO;
 import com.manthatech.PayrollManagement.model.*;
 import com.manthatech.PayrollManagement.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -30,7 +29,6 @@ public class EmployeeService {
 
     @Autowired
     private CountryRepository countryRepository;
-
 
     public Employee createEmployee(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
@@ -61,8 +59,6 @@ public class EmployeeService {
         return mapEntityToDto(employee);
     }
 
-
-
     public void deleteEmployee(Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
@@ -88,15 +84,6 @@ public class EmployeeService {
         EmployeeSensitiveInfo employeeSensitiveInfo = employee.getSensitiveInfo();
         return mapEntityToSensitiveInfoDTO(employeeSensitiveInfo);
     }
-
-
-//    public List<FullTimeSalaryDTO> getEmployeeSalaryHistory(Long employeeId) {
-//        Employee employee = employeeRepository.findById(employeeId)
-//                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-//        return baseSalaryService.getSalariesByEmployee(employee).stream()
-//                .map(SalaryConverter::convertToDto)
-//                .collect(Collectors.toList());
-//    }
 
     private void mapDtoToEntity(EmployeeDTO employeeDTO, Employee employee) {
         if (employeeDTO.getFirstName() != null) employee.setFirstName(employeeDTO.getFirstName());
@@ -136,7 +123,7 @@ public class EmployeeService {
         employeeDTO.setStatus(employee.getStatus());
         employeeDTO.setJobId(employee.getJob().getJobId());
         employeeDTO.setDepartmentId(employee.getDepartment().getDepartmentId());
-        employeeDTO.setCountryId(employee.getCountry().getId());
+//        employeeDTO.setCountryId(employee.getCountry().getId());
         return employeeDTO;
     }
 
@@ -157,6 +144,14 @@ public class EmployeeService {
         employeeSensitiveInfoDTO.setIfscCode(employeeSensitiveInfo.getIfscCode());
         return employeeSensitiveInfoDTO;
     }
+
+//    public List<FullTimeSalaryDTO> getEmployeeSalaryHistory(Long employeeId) {
+//        Employee employee = employeeRepository.findById(employeeId)
+//                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+//        return baseSalaryService.getSalariesByEmployee(employee).stream()
+//                .map(SalaryConverter::convertToDto)
+//                .collect(Collectors.toList());
+//    }
 
 }
 

@@ -15,5 +15,6 @@ public class FullTimeSalaryDTO extends SalaryDTO{
     private Set<EmployeeAllowanceDTO> customAllowances;
     private Set<EmployeeDeductionDTO> customDeductions;
     private Set<EmployeeBenefitDTO> applicableBenefits;
+    private BigDecimal lopDays;
 
 }

@@ -70,8 +70,8 @@ public class SalaryCalculationService {
         int daysInMonth = getDaysForLOPCalculation(salary.getPaymentDate());
         BigDecimal dailySalary = grossEarnings.divide(BigDecimal.valueOf(daysInMonth), RoundingMode.HALF_UP);
 
-        int lopDays = salary.getLopDays();
-        return dailySalary.multiply(BigDecimal.valueOf(lopDays));
+        BigDecimal lopDays = salary.getLopDays();
+        return dailySalary.multiply(lopDays);
     }
 
     private int getDaysForLOPCalculation(LocalDate paymentDate) {
