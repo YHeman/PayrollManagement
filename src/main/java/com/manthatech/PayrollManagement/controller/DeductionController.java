@@ -29,13 +29,18 @@ public class DeductionController {
         return ResponseEntity.ok(allowances);
     }
 
-    @PutMapping("/deductions/{deductionId}")
+    @GetMapping("/{deductionId}")
+    public ResponseEntity<DeductionDTO> getDeductionById(@PathVariable Long deductionId) {
+        return ResponseEntity.ok(deductionService.getDeductionById(deductionId));
+    }
+
+    @PutMapping("/{deductionId}")
     public ResponseEntity<Deduction> updateDeduction(@PathVariable Long deductionId, @RequestBody DeductionDTO deductionDTO) {
         Deduction updatedDeduction = deductionService.updateDeduction(deductionId, deductionDTO);
         return ResponseEntity.ok(updatedDeduction);
     }
 
-    @DeleteMapping("/deductions/{deductionId}")
+    @DeleteMapping("/{deductionId}")
     public ResponseEntity<Void> deleteDeduction(@PathVariable Long deductionId) {
         deductionService.deleteDeduction(deductionId);
         return ResponseEntity.noContent().build();

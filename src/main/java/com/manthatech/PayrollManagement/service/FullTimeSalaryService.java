@@ -63,6 +63,7 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
         if (salaryDTO.getBaseMultiplier() != null) salary.setBaseMultiplier(salaryDTO.getBaseMultiplier());
         if (salaryDTO.getPaymentDate() != null) salary.setPaymentDate(salaryDTO.getPaymentDate());
         if (salaryDTO.getPaymentPeriod() != null) salary.setPaymentPeriod(salaryDTO.getPaymentPeriod());
+        if (salaryDTO.getLopDays() != null) salary.setLopDays(salaryDTO.getLopDays());
         if (salaryDTO.getSalaryStructureId() != null) {
             SalaryStructure salaryStructure = salaryStructureRepository.findById(salaryDTO.getSalaryStructureId())
                     .orElseThrow(() -> new EntityNotFoundException("Salary structure not found"));

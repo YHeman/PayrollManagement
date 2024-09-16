@@ -30,6 +30,12 @@ public class AllowanceService {
         return allowanceRepository.save(allowance);
     }
 
+    public AllowanceDTO getAllowanceById(Long allowanceId) {
+        Allowance allowance = allowanceRepository.findById(allowanceId)
+                .orElseThrow(() -> new EntityNotFoundException("Allowance Not Found"));
+        return mapEntityToDto(allowance);
+    }
+
     public Allowance updateAllowance(Long allowanceId, AllowanceDTO allowanceDTO) {
         Allowance allowance = allowanceRepository.findById(allowanceId)
                 .orElseThrow(() -> new EntityNotFoundException("Allowance not found"));
@@ -47,6 +53,7 @@ public class AllowanceService {
         allowance.setName(allowanceDTO.getName());
         allowance.setDescription(allowanceDTO.getDescription());
         allowance.setTaxable(allowanceDTO.isTaxable());
+        allowance.setMandatory(allowanceDTO.isMandatory());
     }
 
     private AllowanceDTO mapEntityToDto(Allowance allowance) {
@@ -55,6 +62,7 @@ public class AllowanceService {
         allowanceDTO.setName(allowance.getName());
         allowanceDTO.setDescription(allowance.getDescription());
         allowanceDTO.setTaxable(allowance.isTaxable());
+        allowanceDTO.setMandatory(allowance.isMandatory());
         return allowanceDTO;
     }
 }

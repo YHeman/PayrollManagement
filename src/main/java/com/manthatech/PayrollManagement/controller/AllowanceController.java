@@ -29,6 +29,11 @@ public class AllowanceController {
         return ResponseEntity.ok(allowances);
     }
 
+    @GetMapping("/{allowanceId}")
+    public ResponseEntity<AllowanceDTO> getAllowanceById(@PathVariable Long allowanceId) {
+        return ResponseEntity.ok(allowanceService.getAllowanceById(allowanceId));
+    }
+
     @PutMapping("/{allowanceId}")
     public ResponseEntity<Allowance> updateAllowance(@PathVariable Long allowanceId, @RequestBody AllowanceDTO allowanceDTO) {
         Allowance updatedAllowance = allowanceService.updateAllowance(allowanceId, allowanceDTO);

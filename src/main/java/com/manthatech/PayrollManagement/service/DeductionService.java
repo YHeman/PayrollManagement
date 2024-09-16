@@ -30,6 +30,12 @@ public class DeductionService {
                 .collect(Collectors.toList());
     }
 
+    public DeductionDTO getDeductionById(Long deductionId) {
+        Deduction deduction = deductionRepository.findById(deductionId)
+                .orElseThrow(() -> new EntityNotFoundException("Deduction Not Found"));
+        return mapEntityTODto(deduction);
+    }
+
     public Deduction updateDeduction(Long deductionId, DeductionDTO deductionDTO) {
         Deduction deduction = deductionRepository.findById(deductionId)
                 .orElseThrow(() -> new EntityNotFoundException("Deduction not found"));
@@ -47,6 +53,7 @@ public class DeductionService {
         deduction.setName(deductionDTO.getName());
         deduction.setDescription(deductionDTO.getDescription());
         deduction.setStatutory(deductionDTO.isStatutory());
+        deduction.setMandatory(deductionDTO.isMandatory());
     }
 
     private DeductionDTO mapEntityTODto(Deduction deduction) {
@@ -55,6 +62,7 @@ public class DeductionService {
         deductionDTO.setName(deduction.getName());
         deductionDTO.setDescription(deduction.getDescription());
         deductionDTO.setStatutory(deduction.isStatutory());
+        deductionDTO.setMandatory(deduction.isMandatory());
         return deductionDTO;
     }
 }
