@@ -92,6 +92,7 @@ public class EmployeeService {
         if (employeeDTO.getPhone() != null) employee.setPhone(employeeDTO.getPhone());
         if (employeeDTO.getHireDate() != null) employee.setHireDate(employeeDTO.getHireDate());
         if (employeeDTO.getStatus() != null) employee.setStatus(employeeDTO.getStatus());
+        if(employeeDTO.getEmployeeType() != null) employee.setEmployeeType(employeeDTO.getEmployeeType());
 
         if (employeeDTO.getCountryId() != null) {
             Country country = countryRepository.findById(employeeDTO.getCountryId())
@@ -119,6 +120,7 @@ public class EmployeeService {
         employeeDTO.setLastName(employee.getLastName());
         employeeDTO.setEmail(employee.getEmail());
         employeeDTO.setPhone(employee.getPhone());
+        employeeDTO.setEmployeeType(employee.getEmployeeType());
         employeeDTO.setHireDate(employee.getHireDate());
         employeeDTO.setStatus(employee.getStatus());
         employeeDTO.setJobId(employee.getJob().getJobId());

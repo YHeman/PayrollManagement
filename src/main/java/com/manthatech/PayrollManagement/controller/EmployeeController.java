@@ -5,12 +5,14 @@ import com.manthatech.PayrollManagement.DTOS.EmployeeSensitiveInfoDTO;
 import com.manthatech.PayrollManagement.DTOS.FullTimeSalaryDTO;
 import com.manthatech.PayrollManagement.model.Employee;
 import com.manthatech.PayrollManagement.model.EmployeeSensitiveInfo;
+import com.manthatech.PayrollManagement.model.EmployeeType;
 import com.manthatech.PayrollManagement.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 @RestController
@@ -42,6 +44,11 @@ public class EmployeeController {
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
         List<EmployeeDTO> employees = employeeService.getAllEmployees();
         return ResponseEntity.ok(employees);
+    }
+
+    @GetMapping("/employee-types")
+    public List<EmployeeType> getAllEmployeeTypes() {
+        return Arrays.asList(EmployeeType.values());
     }
 
     @DeleteMapping("/{employeeId}")

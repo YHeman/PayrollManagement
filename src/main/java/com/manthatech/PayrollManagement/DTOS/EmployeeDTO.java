@@ -1,5 +1,6 @@
 package com.manthatech.PayrollManagement.DTOS;
 
+import com.manthatech.PayrollManagement.model.EmployeeType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,6 +14,7 @@ public class EmployeeDTO {
     private String lastName;
     private String email;
     private String phone;
+    private EmployeeType employeeType;
     private LocalDate hireDate;
     private String status;
     private Long jobId;

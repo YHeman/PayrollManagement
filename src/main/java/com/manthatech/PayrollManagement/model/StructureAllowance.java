@@ -1,5 +1,6 @@
 package com.manthatech.PayrollManagement.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -21,6 +22,7 @@ public class StructureAllowance {
 
     @ManyToOne
     @JoinColumn(name = "salary_structure_id")
+    @JsonBackReference
     private SalaryStructure salaryStructure;
 
     @ManyToOne
