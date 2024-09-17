@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +31,9 @@ public class EmployeeService {
 
     @Autowired
     private CountryRepository countryRepository;
+
+    @Autowired
+    private FullTimeSalaryRepository fullTimeSalaryRepository;
 
     public Employee createEmployee(EmployeeDTO employeeDTO) {
         Employee employee = new Employee();
@@ -93,6 +98,16 @@ public class EmployeeService {
         if (employeeDTO.getHireDate() != null) employee.setHireDate(employeeDTO.getHireDate());
         if (employeeDTO.getStatus() != null) employee.setStatus(employeeDTO.getStatus());
         if(employeeDTO.getEmployeeType() != null) employee.setEmployeeType(employeeDTO.getEmployeeType());
+        if(employeeDTO.getCurrentSalaryId() != null) {
+            Salary currentSalary = fullTimeSalaryRepository.findById(employeeDTO.getCurrentSalaryId())
+                            .orElseThrow(() -> new EntityNotFoundException("Salary Not Found"));
+            employee.setCurrentSalary(currentSalary);
+        }
+        else {
+            Optional<Salary> latestSalary = employee.getSalaryHistory().stream()
+                    .max(Comparator.comparing(Salary::getPaymentDate));
+            latestSalary.ifPresent(employee::setCurrentSalary);
+        }
 
         if (employeeDTO.getCountryId() != null) {
             Country country = countryRepository.findById(employeeDTO.getCountryId())
@@ -120,6 +135,7 @@ public class EmployeeService {
         employeeDTO.setLastName(employee.getLastName());
         employeeDTO.setEmail(employee.getEmail());
         employeeDTO.setPhone(employee.getPhone());
+        if(employee.getCurrentSalary() != null) employeeDTO.setCurrentSalaryId(employee.getCurrentSalary().getId());
         employeeDTO.setEmployeeType(employee.getEmployeeType());
         employeeDTO.setHireDate(employee.getHireDate());
         employeeDTO.setStatus(employee.getStatus());

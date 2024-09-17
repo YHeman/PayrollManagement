@@ -17,6 +17,7 @@ public class EmployeeDTO {
     private EmployeeType employeeType;
     private LocalDate hireDate;
     private String status;
+    private Long currentSalaryId;
     private Long jobId;
     private Long departmentId;
     private Long countryId;

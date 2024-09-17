@@ -46,7 +46,7 @@ public class Employee {
 
     @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<Salary> salaryHistory;
+    private List<Salary> salaryHistory = new ArrayList<>();
 
     @OneToOne
     @JoinColumn(name = "current_salary_id")

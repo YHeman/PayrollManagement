@@ -11,4 +11,5 @@ public class AllowanceDTO {
     private String description;
     private boolean isTaxable;
     private boolean isMandatory;
+    private long country_id;
 }

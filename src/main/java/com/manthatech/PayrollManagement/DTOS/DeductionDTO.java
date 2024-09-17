@@ -11,4 +11,5 @@ public class DeductionDTO {
     private String description;
     private boolean isStatutory;
     private boolean isMandatory;
+    private long country_id;
 }

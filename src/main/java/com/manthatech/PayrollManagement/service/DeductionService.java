@@ -2,6 +2,7 @@ package com.manthatech.PayrollManagement.service;
 
 import com.manthatech.PayrollManagement.DTOS.DeductionDTO;
 import com.manthatech.PayrollManagement.model.Deduction;
+import com.manthatech.PayrollManagement.repository.CountryRepository;
 import com.manthatech.PayrollManagement.repository.DeductionRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
@@ -17,6 +18,8 @@ public class DeductionService {
 
     @Autowired
     private DeductionRepository deductionRepository;
+
+    private CountryRepository countryRepository;
 
     public Deduction createDeduction(DeductionDTO deductionDTO) {
         Deduction deduction = new Deduction();
@@ -54,6 +57,7 @@ public class DeductionService {
         deduction.setDescription(deductionDTO.getDescription());
         deduction.setStatutory(deductionDTO.isStatutory());
         deduction.setMandatory(deductionDTO.isMandatory());
+        deduction.setCountry(countryRepository.findById(deductionDTO.getCountry_id()).orElseThrow(() -> new EntityNotFoundException("Deduction not found")));
     }
 
     private DeductionDTO mapEntityTODto(Deduction deduction) {
