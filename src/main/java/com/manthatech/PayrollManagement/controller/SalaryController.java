@@ -27,7 +27,7 @@ public class SalaryController {
     @Autowired
     private FullTimeSalaryService fullTimeSalaryService;
 
-
+    @GetMapping
     public ResponseEntity<List<FullTimeSalaryDTO>> getAllSalaries() {
         List<FullTimeSalaryDTO> salaryDTOS = fullTimeSalaryService.getAllSalaries();
         return new ResponseEntity<>(salaryDTOS, HttpStatus.OK);

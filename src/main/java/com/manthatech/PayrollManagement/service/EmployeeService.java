@@ -141,7 +141,7 @@ public class EmployeeService {
         employeeDTO.setStatus(employee.getStatus());
         employeeDTO.setJobId(employee.getJob().getJobId());
         employeeDTO.setDepartmentId(employee.getDepartment().getDepartmentId());
-//        employeeDTO.setCountryId(employee.getCountry().getId());
+        employeeDTO.setCountryId(employee.getCountry().getId());
         return employeeDTO;
     }
 

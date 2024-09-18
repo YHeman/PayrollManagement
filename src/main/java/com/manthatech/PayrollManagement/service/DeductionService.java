@@ -1,6 +1,7 @@
 package com.manthatech.PayrollManagement.service;
 
 import com.manthatech.PayrollManagement.DTOS.DeductionDTO;
+import com.manthatech.PayrollManagement.model.Country;
 import com.manthatech.PayrollManagement.model.Deduction;
 import com.manthatech.PayrollManagement.repository.CountryRepository;
 import com.manthatech.PayrollManagement.repository.DeductionRepository;
@@ -57,7 +58,11 @@ public class DeductionService {
         deduction.setDescription(deductionDTO.getDescription());
         deduction.setStatutory(deductionDTO.isStatutory());
         deduction.setMandatory(deductionDTO.isMandatory());
-        deduction.setCountry(countryRepository.findById(deductionDTO.getCountry_id()).orElseThrow(() -> new EntityNotFoundException("Deduction not found")));
+        if(deductionDTO.getCountry_id() != null) {
+            Country country = countryRepository.findById(deductionDTO.getCountry_id())
+                    .orElseThrow(() -> new EntityNotFoundException("Country Not Found"));
+            deduction.setCountry(country);
+        }
     }
 
     private DeductionDTO mapEntityTODto(Deduction deduction) {
@@ -67,6 +72,7 @@ public class DeductionService {
         deductionDTO.setDescription(deduction.getDescription());
         deductionDTO.setStatutory(deduction.isStatutory());
         deductionDTO.setMandatory(deduction.isMandatory());
+        if(deduction.getCountry() != null) deductionDTO.setCountry_id(deduction.getCountry().getId());
         return deductionDTO;
     }
 }

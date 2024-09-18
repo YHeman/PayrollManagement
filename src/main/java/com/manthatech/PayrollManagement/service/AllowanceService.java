@@ -2,7 +2,9 @@ package com.manthatech.PayrollManagement.service;
 
 import com.manthatech.PayrollManagement.DTOS.AllowanceDTO;
 import com.manthatech.PayrollManagement.model.Allowance;
+import com.manthatech.PayrollManagement.model.Country;
 import com.manthatech.PayrollManagement.repository.AllowanceRepository;
+import com.manthatech.PayrollManagement.repository.CountryRepository;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,9 @@ public class AllowanceService {
 
     @Autowired
     private AllowanceRepository allowanceRepository;
+
+    @Autowired
+    private CountryRepository countryRepository;
 
     public List<AllowanceDTO> getAllAllowances() {
         return allowanceRepository.findAll().stream()
@@ -54,6 +59,12 @@ public class AllowanceService {
         allowance.setDescription(allowanceDTO.getDescription());
         allowance.setTaxable(allowanceDTO.isTaxable());
         allowance.setMandatory(allowanceDTO.isMandatory());
+        if(allowanceDTO.getCountry_id() != null) {
+            Country country = countryRepository.findById(allowanceDTO.getCountry_id())
+                    .orElseThrow(() -> new EntityNotFoundException("Country Not Found"));
+            allowance.setCountry(country);
+        }
+
     }
 
     private AllowanceDTO mapEntityToDto(Allowance allowance) {
@@ -63,6 +74,7 @@ public class AllowanceService {
         allowanceDTO.setDescription(allowance.getDescription());
         allowanceDTO.setTaxable(allowance.isTaxable());
         allowanceDTO.setMandatory(allowance.isMandatory());
+        if (allowance.getCountry() != null) allowanceDTO.setCountry_id(allowance.getCountry().getId());
         return allowanceDTO;
     }
 }
