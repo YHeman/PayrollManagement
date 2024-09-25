@@ -31,7 +31,7 @@ public class PayslipGenerator {
 
     public void generatePayslip(PayslipDetails payslipDetails) throws Exception {
         String uniqueId = UUID.randomUUID().toString();
-        String dest = "payslip" + uniqueId + ".pdf";
+        String dest = "payslip_" + uniqueId + ".pdf";
         PdfWriter writer = new PdfWriter(new FileOutputStream(dest));
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);
@@ -73,6 +73,7 @@ public class PayslipGenerator {
         addEmployeeDetail(leftColumn, "Employee Name", payslipDetails.getEmployeeName());
         addEmployeeDetail(leftColumn, "Department", payslipDetails.getDepartment());
         addEmployeeDetail(leftColumn, "Designation", payslipDetails.getDesignation());
+        addEmployeeDetail(leftColumn, "lop Days", payslipDetails.getLopDays().toString());
 
         // Right column
         Table rightColumn = new Table(UnitValue.createPercentArray(2)).useAllAvailableWidth();

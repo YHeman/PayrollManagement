@@ -11,5 +11,5 @@ public class EmployeeSensitiveInfoDTO {
     private String bankName;
     private String ifscCode;
     private String aadhaarNumber;
-    private Long UAN;
+    private String uan;
 }

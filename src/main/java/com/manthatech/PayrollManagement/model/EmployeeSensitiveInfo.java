@@ -31,7 +31,7 @@ public class EmployeeSensitiveInfo {
     private String bankName;
     private String ifscCode;
     private String aadhaarNumber;
-    private Long UAN;
+    private String uan;
 
     private LocalDateTime createdAt = LocalDateTime.now();
     private LocalDateTime updatedAt = LocalDateTime.now();

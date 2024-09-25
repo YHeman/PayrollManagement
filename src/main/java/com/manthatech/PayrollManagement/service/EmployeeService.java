@@ -168,7 +168,7 @@ public class EmployeeService {
         sensitiveInfo.setBankName(sensitiveInfoDTO.getBankName());
         sensitiveInfo.setIfscCode(sensitiveInfoDTO.getIfscCode());
         sensitiveInfo.setAadhaarNumber(sensitiveInfoDTO.getAadhaarNumber());
-        sensitiveInfo.setUAN(sensitiveInfoDTO.getUAN());
+        sensitiveInfo.setUan(sensitiveInfoDTO.getUan());
     }
 
     private EmployeeSensitiveInfoDTO mapEntityToSensitiveInfoDTO(EmployeeSensitiveInfo employeeSensitiveInfo) {
@@ -178,7 +178,7 @@ public class EmployeeService {
         employeeSensitiveInfoDTO.setBankName(employeeSensitiveInfo.getBankName());
         employeeSensitiveInfoDTO.setBankAccountNumber(employeeSensitiveInfo.getBankAccountNumber());
         employeeSensitiveInfoDTO.setIfscCode(employeeSensitiveInfo.getIfscCode());
-        employeeSensitiveInfoDTO.setUAN(employeeSensitiveInfo.getUAN());
+        employeeSensitiveInfoDTO.setUan(employeeSensitiveInfo.getUan());
         return employeeSensitiveInfoDTO;
     }
 
