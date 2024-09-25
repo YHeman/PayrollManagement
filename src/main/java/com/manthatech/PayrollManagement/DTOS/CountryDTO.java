@@ -7,5 +7,5 @@ import lombok.Setter;
 @Setter
 public class CountryDTO {
     private Long id;
-    private String country;
+    private String countryName;
 }

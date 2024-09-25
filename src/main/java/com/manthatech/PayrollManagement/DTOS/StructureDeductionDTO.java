@@ -11,5 +11,4 @@ public class StructureDeductionDTO {
     private Long id;
     private Long deductionId;
     private BigDecimal amount;
-
 }

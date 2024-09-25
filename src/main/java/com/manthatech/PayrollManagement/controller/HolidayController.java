@@ -13,6 +13,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/holidays")
+@CrossOrigin
 public class HolidayController {
     private final HolidayService holidayService;
 

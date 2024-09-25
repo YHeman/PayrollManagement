@@ -1,7 +1,6 @@
 package com.manthatech.PayrollManagement.service;
 
-import com.manthatech.PayrollManagement.DTOS.EmployeeDTO;
-import com.manthatech.PayrollManagement.DTOS.EmployeeSensitiveInfoDTO;
+import com.manthatech.PayrollManagement.DTOS.*;
 import com.manthatech.PayrollManagement.model.*;
 import com.manthatech.PayrollManagement.repository.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -35,30 +34,30 @@ public class EmployeeService {
     @Autowired
     private FullTimeSalaryRepository fullTimeSalaryRepository;
 
-    public Employee createEmployee(EmployeeDTO employeeDTO) {
+    public Employee createEmployee(EmployeeRequestDTO employeeRequestDTO) {
         Employee employee = new Employee();
-        mapDtoToEntity(employeeDTO, employee);
+        mapDtoToEntity(employeeRequestDTO, employee);
         employee.setCreatedAt(LocalDateTime.now());
         employee.setUpdatedAt(LocalDateTime.now());
         return employeeRepository.save(employee);
     }
 
-    public List<EmployeeDTO> getAllEmployees() {
+    public List<EmployeeResponseDTO> getAllEmployees() {
         List<Employee> employees = employeeRepository.findAll();
         return employees.stream()
                 .map(this::mapEntityToDto)
                 .collect(Collectors.toList());
     }
 
-    public Employee updateEmployee(Long employeeId, EmployeeDTO employeeDTO) {
+    public Employee updateEmployee(Long employeeId, EmployeeRequestDTO employeeRequestDTO) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
-        mapDtoToEntity(employeeDTO, employee);
+        mapDtoToEntity(employeeRequestDTO, employee);
         employee.setUpdatedAt(LocalDateTime.now());
         return employeeRepository.save(employee);
     }
 
-    public EmployeeDTO getEmployeeById(Long employeeId) {
+    public EmployeeResponseDTO getEmployeeById(Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
         return mapEntityToDto(employee);
@@ -68,6 +67,17 @@ public class EmployeeService {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
         employeeRepository.delete(employee);
+    }
+
+    public EmployeeSensitiveInfo addEmployeeSensitiveInfo(Long employeeId, EmployeeSensitiveInfoDTO sensitiveInfoDTO) {
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
+
+        EmployeeSensitiveInfo sensitiveInfo = new EmployeeSensitiveInfo();
+        sensitiveInfo.setEmployee(employee);
+        mapSensitiveInfoDtoToEntity(sensitiveInfoDTO, sensitiveInfo);
+        sensitiveInfo.setUpdatedAt(LocalDateTime.now());
+        return sensitiveInfoRepository.save(sensitiveInfo);
     }
 
     public EmployeeSensitiveInfo updateEmployeeSensitiveInfo(Long employeeId, EmployeeSensitiveInfoDTO sensitiveInfoDTO) {
@@ -83,6 +93,11 @@ public class EmployeeService {
         sensitiveInfo.setUpdatedAt(LocalDateTime.now());
         return sensitiveInfoRepository.save(sensitiveInfo);
     }
+
+    public Employee getEmployee(Long employeeId) {
+        return employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new EntityNotFoundException("Employee Not Found"));
+    }
     public EmployeeSensitiveInfoDTO getEmployeeSensitiveInfo(Long employeeId) {
         Employee employee = employeeRepository.findById(employeeId)
                 .orElseThrow(() -> new EntityNotFoundException("Employee not found"));
@@ -90,16 +105,16 @@ public class EmployeeService {
         return mapEntityToSensitiveInfoDTO(employeeSensitiveInfo);
     }
 
-    private void mapDtoToEntity(EmployeeDTO employeeDTO, Employee employee) {
-        if (employeeDTO.getFirstName() != null) employee.setFirstName(employeeDTO.getFirstName());
-        if (employeeDTO.getLastName() != null) employee.setLastName(employeeDTO.getLastName());
-        if (employeeDTO.getEmail() != null) employee.setEmail(employeeDTO.getEmail());
-        if (employeeDTO.getPhone() != null) employee.setPhone(employeeDTO.getPhone());
-        if (employeeDTO.getHireDate() != null) employee.setHireDate(employeeDTO.getHireDate());
-        if (employeeDTO.getStatus() != null) employee.setStatus(employeeDTO.getStatus());
-        if(employeeDTO.getEmployeeType() != null) employee.setEmployeeType(employeeDTO.getEmployeeType());
-        if(employeeDTO.getCurrentSalaryId() != null) {
-            Salary currentSalary = fullTimeSalaryRepository.findById(employeeDTO.getCurrentSalaryId())
+    private void mapDtoToEntity(EmployeeRequestDTO employeeRequestDTO, Employee employee) {
+        if (employeeRequestDTO.getFirstName() != null) employee.setFirstName(employeeRequestDTO.getFirstName());
+        if (employeeRequestDTO.getLastName() != null) employee.setLastName(employeeRequestDTO.getLastName());
+        if (employeeRequestDTO.getEmail() != null) employee.setEmail(employeeRequestDTO.getEmail());
+        if (employeeRequestDTO.getPhone() != null) employee.setPhone(employeeRequestDTO.getPhone());
+        if (employeeRequestDTO.getHireDate() != null) employee.setHireDate(employeeRequestDTO.getHireDate());
+        if (employeeRequestDTO.isEnabled()) employee.setEnabled(employeeRequestDTO.isEnabled());
+        if(employeeRequestDTO.getEmployeeType() != null) employee.setEmployeeType(employeeRequestDTO.getEmployeeType());
+        if(employeeRequestDTO.getCurrentSalaryId() != null) {
+            Salary currentSalary = fullTimeSalaryRepository.findById(employeeRequestDTO.getCurrentSalaryId())
                             .orElseThrow(() -> new EntityNotFoundException("Salary Not Found"));
             employee.setCurrentSalary(currentSalary);
         }
@@ -109,41 +124,43 @@ public class EmployeeService {
             latestSalary.ifPresent(employee::setCurrentSalary);
         }
 
-        if (employeeDTO.getCountryId() != null) {
-            Country country = countryRepository.findById(employeeDTO.getCountryId())
+        if (employeeRequestDTO.getCountryId() != null) {
+            Country country = countryRepository.findById(employeeRequestDTO.getCountryId())
                     .orElseThrow(() -> new EntityNotFoundException("Country Not Found"));
             employee.setCountry(country);
         }
 
-        if (employeeDTO.getJobId() != null) {
-            Job job = jobRepository.findById(employeeDTO.getJobId())
+        if (employeeRequestDTO.getJobId() != null) {
+            Job job = jobRepository.findById(employeeRequestDTO.getJobId())
                     .orElseThrow(() -> new EntityNotFoundException("Job not found"));
             employee.setJob(job);
         }
 
-        if (employeeDTO.getDepartmentId() != null) {
-            Department department = departmentRepository.findById(employeeDTO.getDepartmentId())
+        if (employeeRequestDTO.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(employeeRequestDTO.getDepartmentId())
                     .orElseThrow(() -> new EntityNotFoundException("Department not found"));
             employee.setDepartment(department);
         }
+
     }
 
-    private EmployeeDTO mapEntityToDto(Employee employee) {
-        EmployeeDTO employeeDTO = new EmployeeDTO();
-        employeeDTO.setEmployeeId(employee.getEmployeeId());
-        employeeDTO.setFirstName(employee.getFirstName());
-        employeeDTO.setLastName(employee.getLastName());
-        employeeDTO.setEmail(employee.getEmail());
-        employeeDTO.setPhone(employee.getPhone());
-        if(employee.getCurrentSalary() != null) employeeDTO.setCurrentSalaryId(employee.getCurrentSalary().getId());
-        employeeDTO.setEmployeeType(employee.getEmployeeType());
-        employeeDTO.setHireDate(employee.getHireDate());
-        employeeDTO.setStatus(employee.getStatus());
-        employeeDTO.setJobId(employee.getJob().getJobId());
-        employeeDTO.setDepartmentId(employee.getDepartment().getDepartmentId());
-        employeeDTO.setCountryId(employee.getCountry().getId());
-        return employeeDTO;
+    private EmployeeResponseDTO mapEntityToDto(Employee employee) {
+        EmployeeResponseDTO dto = new EmployeeResponseDTO();
+        dto.setEmployeeId(employee.getEmployeeId());
+        dto.setFirstName(employee.getFirstName());
+        dto.setLastName(employee.getLastName());
+        dto.setEnabled(employee.isEnabled());
+        dto.setEmail(employee.getEmail());
+        dto.setPhone(employee.getPhone());
+        dto.setHireDate(employee.getHireDate());
+        if(employee.getCurrentSalary() != null) dto.setCurrentSalaryId(employee.getCurrentSalary().getId());
+        dto.setEmployeeType(employee.getEmployeeType());
+        dto.setDepartment(convertToDTO(employee.getDepartment()));
+        dto.setJob(convertToDTO(employee.getJob()));
+        if (employee.getCountry() != null) dto.setCountry(convertToDTO(employee.getCountry()));
+        return dto;
     }
+
 
     private void mapSensitiveInfoDtoToEntity(EmployeeSensitiveInfoDTO sensitiveInfoDTO, EmployeeSensitiveInfo sensitiveInfo) {
         sensitiveInfo.setPan(sensitiveInfoDTO.getPan());
@@ -151,6 +168,7 @@ public class EmployeeService {
         sensitiveInfo.setBankName(sensitiveInfoDTO.getBankName());
         sensitiveInfo.setIfscCode(sensitiveInfoDTO.getIfscCode());
         sensitiveInfo.setAadhaarNumber(sensitiveInfoDTO.getAadhaarNumber());
+        sensitiveInfo.setUAN(sensitiveInfoDTO.getUAN());
     }
 
     private EmployeeSensitiveInfoDTO mapEntityToSensitiveInfoDTO(EmployeeSensitiveInfo employeeSensitiveInfo) {
@@ -160,7 +178,32 @@ public class EmployeeService {
         employeeSensitiveInfoDTO.setBankName(employeeSensitiveInfo.getBankName());
         employeeSensitiveInfoDTO.setBankAccountNumber(employeeSensitiveInfo.getBankAccountNumber());
         employeeSensitiveInfoDTO.setIfscCode(employeeSensitiveInfo.getIfscCode());
+        employeeSensitiveInfoDTO.setUAN(employeeSensitiveInfo.getUAN());
         return employeeSensitiveInfoDTO;
+    }
+
+    private DepartmentDTO convertToDTO(Department department) {
+        DepartmentDTO departmentDTO = new DepartmentDTO();
+        departmentDTO.setDepartmentId(department.getDepartmentId());
+        departmentDTO.setDepartmentName(department.getDepartmentName());
+        departmentDTO.setLocation(department.getLocation());
+        if (department.getManager() != null) departmentDTO.setManagerId(department.getManager().getEmployeeId());
+        return departmentDTO;
+    }
+
+    public JobDTO convertToDTO(Job job) {
+        JobDTO jobDTO = new JobDTO();
+        jobDTO.setJobId(job.getJobId());
+        jobDTO.setJobTitle(job.getJobTitle());
+        jobDTO.setDescription(job.getDescription());
+        return jobDTO;
+    }
+
+    public CountryDTO convertToDTO(Country country) {
+        CountryDTO countryDTO = new CountryDTO();
+        countryDTO.setId(country.getId());
+        countryDTO.setCountryName(country.getCountry());
+        return countryDTO;
     }
 
 //    public List<FullTimeSalaryDTO> getEmployeeSalaryHistory(Long employeeId) {

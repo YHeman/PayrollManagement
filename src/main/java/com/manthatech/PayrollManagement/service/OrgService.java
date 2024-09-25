@@ -42,13 +42,13 @@ public class OrgService {
     public CountryDTO convertToDto(Country country) {
         CountryDTO countryDTO = new CountryDTO();
         countryDTO.setId(country.getId());
-        countryDTO.setCountry(country.getCountry());
+        countryDTO.setCountryName(country.getCountry());
         return countryDTO;
     }
 
     public Country convertToEntity(CountryDTO countryDTO) {
         Country country = new Country();
-        country.setCountry(countryDTO.getCountry());
+        country.setCountry(countryDTO.getCountryName());
         return country;
     }
 }

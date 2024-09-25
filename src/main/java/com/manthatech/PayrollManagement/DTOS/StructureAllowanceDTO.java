@@ -10,5 +10,4 @@ public class StructureAllowanceDTO {
     private Long id;
     private Long allowanceId;
     private BigDecimal amount;
-
 }

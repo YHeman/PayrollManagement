@@ -1,10 +1,12 @@
 package com.manthatech.PayrollManagement.service;
 
+import com.manthatech.PayrollManagement.DTOS.CountryDTO;
 import com.manthatech.PayrollManagement.DTOS.SalaryStructureDTO;
 import com.manthatech.PayrollManagement.DTOS.StructureAllowanceDTO;
 import com.manthatech.PayrollManagement.DTOS.StructureDeductionDTO;
 import com.manthatech.PayrollManagement.model.*;
 import com.manthatech.PayrollManagement.repository.AllowanceRepository;
+import com.manthatech.PayrollManagement.repository.CountryRepository;
 import com.manthatech.PayrollManagement.repository.DeductionRepository;
 import com.manthatech.PayrollManagement.repository.SalaryStructureRepository;
 import jakarta.persistence.EntityNotFoundException;
@@ -27,9 +29,13 @@ public class SalaryStructureService {
     @Autowired
     private DeductionRepository deductionRepository;
 
+    @Autowired
+    private CountryRepository countryRepository;
+
     public SalaryStructureDTO createSalaryStructure(SalaryStructureDTO salaryStructureDTO) {
         SalaryStructure salaryStructure = new SalaryStructure();
         salaryStructure.setName(salaryStructureDTO.getName());
+        salaryStructure.setDescription(salaryStructureDTO.getDescription());
         salaryStructure.setBaseSalary(salaryStructureDTO.getBaseSalary());
 
         Set<StructureAllowance> structureAllowances = salaryStructureDTO.getStructureAllowances().stream()
@@ -58,6 +64,9 @@ public class SalaryStructureService {
 
         salaryStructure.setStructureDeductions(structureDeductions);
 
+        if(salaryStructureDTO.getCountryId() != null) salaryStructure.setCountry(countryRepository.findById(salaryStructureDTO.getCountryId())
+                .orElseThrow(() -> new EntityNotFoundException("Country Not Found")));
+
 
         SalaryStructure savedStructure = salaryStructureRepository.save(salaryStructure);
 
@@ -69,6 +78,8 @@ public class SalaryStructureService {
                 .orElseThrow(() -> new EntityNotFoundException("Salary Structure not found"));
 
         salaryStructure.setName(salaryStructureDTO.getName());
+        salaryStructure.setDescription(salaryStructureDTO.getDescription());
+
         salaryStructure.setBaseSalary(salaryStructureDTO.getBaseSalary());
 
         salaryStructure.getStructureAllowances().clear();
@@ -99,6 +110,9 @@ public class SalaryStructureService {
 
         salaryStructure.getStructureDeductions().addAll(updatedStructureDeductions);
 
+        if(salaryStructureDTO.getCountryId() != null) salaryStructure.setCountry(countryRepository.findById(salaryStructureDTO.getCountryId())
+                .orElseThrow(() -> new EntityNotFoundException("Country Not Found")));
+
         SalaryStructure updatedSalaryStructure = salaryStructureRepository.save(salaryStructure);
 
         return convertToDTO(updatedSalaryStructure);
@@ -126,6 +140,7 @@ public class SalaryStructureService {
         SalaryStructureDTO dto = new SalaryStructureDTO();
         dto.setId(salaryStructure.getId());
         dto.setName(salaryStructure.getName());
+        dto.setDescription(salaryStructure.getDescription());
         dto.setBaseSalary(salaryStructure.getBaseSalary());
 
         Set<StructureAllowanceDTO> structureAllowanceDTOs = salaryStructure.getStructureAllowances().stream()
@@ -149,9 +164,15 @@ public class SalaryStructureService {
                 }).collect(Collectors.toSet());
 
         dto.setStructureDeductions(structureDeductionDTOs);
-
+        if(salaryStructure.getCountry() != null) {
+            Country country = countryRepository.findById(salaryStructure.getCountry().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Country Not Found"));
+            dto.setCountryId(country.getId());
+            dto.setCountryName(country.getCountry());
+        }
 
         return dto;
     }
+
 }
 

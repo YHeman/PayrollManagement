@@ -113,6 +113,7 @@ public class FullTimeSalaryService extends BaseSalaryService<FullTimeSalary, Ful
         if(salaryDTO.getBaseMultiplier() != null) salary.setBaseMultiplier(salaryDTO.getBaseMultiplier());
         else salary.setBaseMultiplier(BigDecimal.ONE);
         if (salaryDTO.getLopDays() != null) salary.setLopDays(salaryDTO.getLopDays());
+        else salary.setLopDays(BigDecimal.ZERO);
         salary.setPaymentDate(salaryDTO.getPaymentDate());
         salary.setPaymentPeriod(salaryDTO.getPaymentPeriod());
         return salary;

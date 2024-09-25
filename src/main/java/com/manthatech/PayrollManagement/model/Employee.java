@@ -30,7 +30,7 @@ public class Employee {
     private String email;
     private String phone;
     private LocalDate hireDate;
-    private String status = "active";
+    private boolean enabled;
 
     @ManyToOne
     @JoinColumn(name = "job_id", nullable = false)

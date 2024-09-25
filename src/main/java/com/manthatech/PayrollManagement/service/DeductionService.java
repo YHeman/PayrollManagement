@@ -20,6 +20,7 @@ public class DeductionService {
     @Autowired
     private DeductionRepository deductionRepository;
 
+    @Autowired
     private CountryRepository countryRepository;
 
     public Deduction createDeduction(DeductionDTO deductionDTO) {

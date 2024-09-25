@@ -21,6 +21,7 @@ public class SalaryStructure {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private String description;
     private BigDecimal baseSalary;
 
     @OneToMany(mappedBy = "salaryStructure", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/org")
+@CrossOrigin
 public class OrgController {
 
     @Autowired

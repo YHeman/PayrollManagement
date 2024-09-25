@@ -23,4 +23,5 @@ public class PayslipDetails {
     private Map<String, PayslipAllowance> allowances;
     private Map<String, PayslipDeduction> deductions;
     private LocalDate hireDate;
+    private SalaryCalculationResult salaryCalculationResult;
 }

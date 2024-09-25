@@ -1,5 +1,6 @@
 package com.manthatech.PayrollManagement.service;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import com.manthatech.PayrollManagement.DTOS.EmployeeSensitiveInfoDTO;
 import com.manthatech.PayrollManagement.DTOS.PayslipAllowance;
 import com.manthatech.PayrollManagement.DTOS.PayslipDeduction;
@@ -8,11 +9,19 @@ import com.manthatech.PayrollManagement.model.*;
 import com.manthatech.PayrollManagement.repository.*;
 import com.manthatech.PayrollManagement.utils.SalaryConfiguration;
 import jakarta.persistence.EntityNotFoundException;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -21,11 +30,71 @@ public class PayslipService {
     @Autowired
     private EmployeeRepository employeeRepository;
 
+    @Autowired
+    private SalaryCalculationService salaryCalculationService;
+
+    @Autowired
+    private PayslipGenerator payslipGenerator;
 
     @Autowired
     private SalaryConfiguration salaryConfiguration;
 
+    public void generateBulkPayslips(MultipartFile file) throws IOException {
+        Workbook workbook = new XSSFWorkbook(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0); // assuming the data is in the first sheet
 
+        Iterator<Row> rowIterator = sheet.iterator();
+        while (rowIterator.hasNext()) {
+            Row row = rowIterator.next();
+            if (row.getRowNum() == 0) continue; // Skip the header row
+
+            Long employeeId = (long) row.getCell(0).getNumericCellValue();
+            BigDecimal lopDays = BigDecimal.valueOf(row.getCell(1).getNumericCellValue());
+
+            // Call method to generate payslip for each employee
+            generatePayslip(employeeId, lopDays);
+        }
+        workbook.close();
+    }
+    public void generatePayslip(Long employeeId, BigDecimal lopDays) {
+        PayslipDetails details = getPayslipDetails(employeeId, lopDays);
+        try {
+            payslipGenerator.generatePayslip(details);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void generatePayslip(Long employeeId) {
+        PayslipDetails details = getPayslipDetails(employeeId);
+        try {
+            payslipGenerator.generatePayslip(details);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public PayslipDetails getPayslipDetails(Long employeeId, BigDecimal lopDays) {
+        PayslipDetails dto = new PayslipDetails();
+        Employee employee = employeeRepository.findById(employeeId)
+                .orElseThrow(() -> new EntityNotFoundException("Employee Not Found"));
+        dto.setEmployeeId(employee.getEmployeeId());
+        dto.setEmployeeName(employee.getFirstName().concat(employee.getLastName()));
+        dto.setDesignation(employee.getJob().getJobTitle());
+        dto.setDepartment(employee.getDepartment().getDepartmentName());
+        dto.setHireDate(employee.getHireDate());
+        dto.setEmployeeSensitiveInfo(convertToDTO(employee.getSensitiveInfo()));
+
+        FullTimeSalary salary = (FullTimeSalary) employee.getCurrentSalary();
+        dto.setBasicSalary(calculateBaseSalary(salary));
+        salary.setLopDays(lopDays);
+        dto.setLopDays(lopDays);
+        dto.setTotalDays(salaryConfiguration.getFixedDaysPerMonth());
+        dto.setAllowances(getAllAllowances(salary));
+        dto.setDeductions(getAllDeductions(salary));
+        dto.setSalaryCalculationResult(salaryCalculationService.calculateSalary(salary));
+        return dto;
+    }
 
 
     public PayslipDetails getPayslipDetails(Long employeeId) {
@@ -45,9 +114,11 @@ public class PayslipService {
         dto.setTotalDays(salaryConfiguration.getFixedDaysPerMonth());
         dto.setAllowances(getAllAllowances(salary));
         dto.setDeductions(getAllDeductions(salary));
+        dto.setSalaryCalculationResult(salaryCalculationService.calculateSalary(salary));
         return dto;
 
     }
+
 
     private Map<String, PayslipAllowance> getAllAllowances(FullTimeSalary salary) {
         Map<String, PayslipAllowance> allowances = new HashMap<>();

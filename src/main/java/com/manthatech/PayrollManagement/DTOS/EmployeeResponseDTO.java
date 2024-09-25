@@ -8,7 +8,7 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-public class EmployeeDTO {
+public class EmployeeResponseDTO {
     private Long employeeId;
     private String firstName;
     private String lastName;
@@ -16,9 +16,9 @@ public class EmployeeDTO {
     private String phone;
     private EmployeeType employeeType;
     private LocalDate hireDate;
-    private String status;
+    private boolean enabled;
     private Long currentSalaryId;
-    private Long jobId;
-    private Long departmentId;
-    private Long countryId;
+    private JobDTO job;
+    private DepartmentDTO department;
+    private CountryDTO country;
 }

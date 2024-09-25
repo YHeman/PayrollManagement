@@ -12,9 +12,11 @@ import java.util.Set;
 public class SalaryStructureDTO {
     private Long id;
     private String name;
+    private String description;
     private BigDecimal baseSalary;
     private Set<StructureAllowanceDTO> structureAllowances;
     private Set<StructureDeductionDTO> structureDeductions;
     private Long countryId;
+    private String countryName;
 }
 
