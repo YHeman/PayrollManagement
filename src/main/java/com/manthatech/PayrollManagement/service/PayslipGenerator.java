@@ -31,7 +31,7 @@ public class PayslipGenerator {
 
     public void generatePayslip(PayslipDetails payslipDetails) throws Exception {
         String uniqueId = UUID.randomUUID().toString();
-        String dest = "payslip_" + uniqueId + ".pdf";
+        String dest = "C:\\Users\\Uday Kiran Reddy\\Desktop\\Example Files\\payslip_" + uniqueId + ".pdf";
         PdfWriter writer = new PdfWriter(new FileOutputStream(dest));
         PdfDocument pdfDoc = new PdfDocument(writer);
         Document document = new Document(pdfDoc);

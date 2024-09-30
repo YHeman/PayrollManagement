@@ -187,6 +187,8 @@ public class PayslipService {
         employeeSensitiveInfoDTO.setPan(employeeSensitiveInfo.getPan());
         employeeSensitiveInfoDTO.setAadhaarNumber(employeeSensitiveInfo.getAadhaarNumber());
         employeeSensitiveInfoDTO.setBankAccountNumber(employeeSensitiveInfo.getBankAccountNumber());
+        employeeSensitiveInfoDTO.setUan(employeeSensitiveInfo.getUan());
+        employeeSensitiveInfoDTO.setBankName(employeeSensitiveInfo.getBankName());
         employeeSensitiveInfoDTO.setIfscCode(employeeSensitiveInfo.getIfscCode());
         return employeeSensitiveInfoDTO;
     }
