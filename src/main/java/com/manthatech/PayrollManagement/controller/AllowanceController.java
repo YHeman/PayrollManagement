@@ -15,8 +15,11 @@ import java.util.List;
 @CrossOrigin
 public class AllowanceController {
 
-    @Autowired
     private AllowanceService allowanceService;
+
+    public AllowanceController(AllowanceService allowanceService) {
+        this.allowanceService = allowanceService;
+    }
 
     @PostMapping
     public ResponseEntity<Allowance> createAllowance(@RequestBody AllowanceDTO allowanceDTO) {
