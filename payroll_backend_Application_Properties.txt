@@ -1,0 +1,18 @@
+spring.application.name=PayrollManagement
+
+#Change the Database URL, user-name, password accordingly
+spring.datasource.url=jdbc:postgresql://localhost:5432/PayrollManagement
+spring.datasource.username=postgres
+spring.datasource.password=
+
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.jpa.database-platform=org.hibernate.dialect.PostgreSQLDialect
+spring.jpa.hibernate.ddl-auto=update
+
+
+spring.security.oauth2.resourceserver.jwt.issuer-uri=http://localhost:8080/realms/AlphaRealm
+spring.security.oauth2.resourceserver.jwt.jwk-set-uri=${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+
+# JWT Configuration
+jwt.auth.converter.resource-id=payroll_app
+jwt.auth.converter.principal-attribute=principal_username
